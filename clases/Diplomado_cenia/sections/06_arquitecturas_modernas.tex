@@ -1,0 +1,148 @@
+\section{Arquitecturas Modernas: Cómo Resuelven Estos Problemas}
+
+\begin{frame}[fragile]{La Evolución de las Soluciones}
+
+  \textbf{Recordemos los problemas que identificamos:}
+  \begin{itemize}
+    \item Sincronización temporal audio-video
+    \item Coherencia cross-modal
+    \item Escalabilidad a videos largos
+    \item Calidad en ambas modalidades
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Veremos cómo los modelos modernos atacan estos problemas:}
+  \begin{enumerate}
+    \item \textbf{Open-Sora}: Transparencia en la arquitectura
+    \item \textbf{Sistemas propietarios}: Sora, Veo3, Kling
+    \item \textbf{Tendencias arquitectónicas comunes}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Open-Sora: ¿Por Qué Es Relevante?}
+\begin{small}
+  Paper: \url{https://arxiv.org/pdf/2412.20404}
+
+  Repositorio: \url{https://github.com/hpcaitech/Open-Sora}
+
+  \vspace{0.3cm}
+
+  \textbf{¿Por qué estudiarlo?}
+  \begin{itemize}
+    \item \textbf{Es open-source}: Pueden experimentar y ver el código
+    \item \textbf{Documenta las decisiones arquitectónicas} que los sistemas cerrados no revelan
+    \item \textbf{Representa el estado del arte abierto}
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Componentes clave:}
+  \begin{itemize}
+    \item \textbf{Diffusion Transformer (DiT)} para video
+    \item \textbf{Integración de condicionamiento temporal}
+    \item \textbf{Estrategias de entrenamiento multi-escala}
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Open-Sora: ¿Qué Resuelve de los Problemas Clásicos?}
+\begin{small}
+  \textbf{1. Consistencia temporal larga:}
+  \begin{itemize}
+    \item Usa \textbf{attention sobre secuencias} completas de frames
+    \item No como RNN (VideoGPT) que procesa frame por frame
+    \item Puede "ver" toda la secuencia a la vez
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Escalabilidad:}
+  \begin{itemize}
+    \item \textbf{Entrenamiento progresivo}: Empieza con videos cortos/baja resolución
+    \item Gradualmente aumenta complejidad
+    \item Permite entrenar en hardware limitado
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Eficiencia:}
+  \begin{itemize}
+    \item \textbf{Latent diffusion}: No trabaja en píxeles crudos
+    \item Similar a Stable Diffusion (que vieron) pero para video
+    \item Reduce costo computacional dramáticamente
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Sistemas Propietarios: Sora, Veo3, Kling}
+\begin{small}
+  \textbf{Lo que sabemos (y lo que no):}
+
+  \vspace{0.3cm}
+
+  \textbf{Arquitectura probable:}
+  \begin{itemize}
+    \item Probablemente \textbf{DiT-based} (Diffusion Transformers)
+    \item Entrenamiento en datasets masivos propietarios
+    \item \textbf{Generación de audio nativa} (no post-procesado)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{La brecha open vs closed:}
+  \begin{itemize}
+    \item \textbf{Calidad de datos de entrenamiento}: Probablemente órdenes de magnitud más datos
+    \item \textbf{Compute disponible}: Clusters masivos de GPUs
+    \item \textbf{Técnicas de fine-tuning no publicadas}: "Secret sauce"
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{La pregunta importante}
+  ¿La diferencia es arquitectónica o es solo escala (datos + compute)?
+  Probablemente: \textbf{mayormente escala}.
+  \end{alertblock}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Tendencias Arquitectónicas Comunes}
+\begin{small}
+  Más allá de los modelos específicos, hay patrones claros:
+
+  \textbf{1. Diffusion Transformers (DiT):}
+  \begin{itemize}
+    \item Reemplaza U-Net (de Stable Diffusion) con transformers puros
+    \item Mejor escalabilidad y consistencia temporal
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{2. Latent representations:}
+  \begin{itemize}
+    \item Nadie modela píxeles directamente
+    \item VAE o codecs neurales (como EnCodec para audio)
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{3. Multi-modal training:}
+  \begin{itemize}
+    \item Entrenamiento conjunto de audio y video desde el inicio
+    \item No "pegar" dos modelos separados
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{4. Progressive training:}
+  \begin{itemize}
+    \item Empezar simple (corto, baja resolución)
+    \item Gradualmente aumentar complejidad
+  \end{itemize}
+\end{small}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN: PROBLEMAS ABIERTOS
+%============================================================================
+

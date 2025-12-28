@@ -1,0 +1,114 @@
+\section{El Problema de la Condicionalidad}
+
+\begin{frame}[fragile]{Pregunta Central: ¿Cómo Unimos Audio y Video?}
+
+  Esta es la pregunta central de la clase.
+
+  \vspace{0.3cm}
+
+  \textbf{Tres estrategias fundamentales de condicionamiento:}
+
+  \begin{enumerate}
+    \item \textbf{Video → Audio (V2A)}: Dado un video, generar el audio correspondiente
+    \item \textbf{Audio → Video (A2V)}: Dado un audio, generar video coherente
+    \item \textbf{Texto → Audio + Video (T2AV)}: Generación conjunta desde descripción textual
+  \end{enumerate}
+
+  \vspace{0.3cm}
+
+  \begin{block}{La tensión fundamental}
+  Cada dirección tiene desafíos únicos. No hay una solución universal.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Video → Audio (V2A)}
+\begin{small}
+  \textbf{Idea}: Dado un video, generar el audio correspondiente.
+  \textbf{Aplicaciones:}
+  \begin{itemize}
+    \item \textbf{Foley automático}: Efectos de sonido para cine/TV
+    \item \textbf{Sonorización de películas mudas}
+    \item \textbf{Accesibilidad}: Audio-descripción generativa
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Desafíos técnicos:}
+  \begin{itemize}
+    \item \textbf{Sincronización temporal precisa}: El audio debe coincidir frame a frame
+    \item \textbf{Entender qué objetos producen qué sonidos}: Mapeo visual-sonoro
+    \item \textbf{Ambiente vs acciones puntuales}: Separar sonidos de fondo de eventos
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Modelos relevantes:}
+  \begin{itemize}
+    \item \textbf{V2A de DeepMind}: \url{https://deepmind.google/blog/generating-audio-for-video/}
+    \item Sistemas de Foley automático en producción
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Audio → Video (A2V)}
+\begin{small}
+  \textbf{Idea}: Dado un audio, generar video coherente.
+
+  \vspace{0.3cm}
+
+  \textbf{Aplicaciones:}
+  \begin{itemize}
+    \item \textbf{Talking heads / avatares virtuales}: Generación de portavoces sintéticos
+    \item \textbf{Visualización de música}: Music videos generativos
+    \item \textbf{Asistentes virtuales}: Interfaces conversacionales
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Desafíos técnicos:}
+  \begin{itemize}
+    \item \textbf{El audio tiene menos información que el video}: Problema ill-posed
+    \item \textbf{Múltiples videos válidos para un mismo audio}: Alta ambigüedad
+    \item \textbf{Consistencia de identidad}: Mantener la misma persona/estilo
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{exampleblock}{El problema fundamental}
+  "Hola, ¿cómo estás?" puede ser dicho por infinitas personas, en infinitos contextos, con infinitas expresiones faciales. ¿Cuál generamos?
+  \end{exampleblock}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Texto → Audio + Video (T2AV)}
+\begin{small}
+  \textbf{El santo grial actual.} Es lo que hacen Sora, Veo3, etc.
+
+  \textbf{¿Por qué texto?}
+  \begin{itemize}
+    \item Interfaz natural para humanos
+    \item Fácil de especificar intención
+    \item Permite control de alto nivel
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Desafíos únicos:}
+  \begin{itemize}
+    \item \textbf{Mantener coherencia cross-modal}: Audio y video deben "concordar"
+    \item \textbf{El texto es ambiguo respecto al timing}: "un perro ladra" ¿cuándo? ¿cuánto dura?
+    \item \textbf{Calidad en ambas modalidades simultáneamente}: Fácil que una sea buena y la otra mala
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{El desafío de la coherencia}
+  No basta con generar buen video Y buen audio. Deben estar \textit{sincronizados} y ser \textit{plausibles juntos}.
+  \end{alertblock}
+\end{small}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN: PROFUNDIZACIÓN ARQUITECTURAS ESPECÍFICAS
+%============================================================================
+

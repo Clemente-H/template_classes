@@ -1,0 +1,60 @@
+\section{Deepfakes: El Elefante en la Habitación}
+
+\begin{frame}[fragile]{¿Qué Son Realmente los Deepfakes?}
+
+  Los deepfakes fueron el primer caso masivo de generación audio-video condicionada.
+
+  \vspace{0.3cm}
+
+  \textbf{Recordemos "Synthesizing Obama" que vieron en la clase de video:}
+  \begin{itemize}
+    \item Audio → movimiento de labios (lip sync)
+    \item Composición con video target
+    \item Primera demostración masiva del problema
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{La evolución:}
+  \begin{itemize}
+    \item \textbf{Primera generación}: Audio → movimiento de labios (lip sync)
+    \item \textbf{Segunda generación}: Face swapping + voice cloning separados
+    \item \textbf{Generación actual}: Sistemas end-to-end que generan persona completa
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{El Problema Ético}
+\begin{small}
+  Ya lo discutieron en clases anteriores, pero vale reforzar:
+
+  \vspace{0.3cm}
+
+  \textbf{Riesgos concretos:}
+  \begin{itemize}
+    \item \textbf{Desinformación política}: Videos falsos de figuras públicas
+    \item \textbf{Fraude por suplantación}: Voice cloning para estafas
+    \item \textbf{Contenido no consensuado}: Uso de imagen/voz sin permiso
+    \item \textbf{La carrera armamentista}: generación vs detección
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Pregunta crítica}
+  Con sistemas como Sora y Veo que generan audio y video nativamente, ¿cómo distinguimos lo real de lo sintético?
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \textbf{Respuestas técnicas en desarrollo:}
+  \begin{itemize}
+    \item Watermarking embebido en la generación
+    \item Sistemas de detección (pero siempre van atrás)
+    \item Registros de proveniencia (C2PA)
+  \end{itemize}
+\end{small}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN: EL PROBLEMA DE LA CONDICIONALIDAD
+%============================================================================
+

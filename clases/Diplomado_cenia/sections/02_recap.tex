@@ -1,0 +1,57 @@
+\section{Recap Express: Lo Que Ya Saben}
+
+\begin{frame}[fragile]{Audio — Lo Esencial}
+\begin{small}
+  \textbf{Representaciones de audio:}
+  \begin{itemize}
+    \item \textbf{Señal cruda}: amplitud, frecuencia, fase
+    \item \textbf{Espectrogramas}: representación tiempo-frecuencia que permite tratar audio "como imagen"
+    \item \textbf{El problema de la dimensionalidad}: 1 segundo = 24,000 valores
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Soluciones modernas que ya vieron:}
+  \begin{itemize}
+    \item \textbf{Neural codecs (EnCodec)}: Compresión aprendida del audio
+    \item \textbf{Tokenización para LLMs}: VALL-E trata audio como lenguaje
+    \item \textbf{Neural vocoders}: HiFi-GAN para generar waveform en paralelo
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{exampleblock}{El patrón que vieron}
+  Comprimir → Modelar en espacio comprimido → Decodificar
+  \end{exampleblock}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Video — Lo Esencial}
+\begin{small}
+  \textbf{Estructura del video:}
+  \begin{itemize}
+    \item \textbf{Secuencia de frames}: el video es un tensor 4D (batch × tiempo × alto × ancho × canales)
+    \item \textbf{Consistencia temporal}: el gran desafío — mantener coherencia entre frames
+  \end{itemize}
+
+  \textbf{Soluciones que ya vieron:}
+  \begin{itemize}
+    \item \textbf{VQ-VAE}: Codebooks para discretizar video (VideoGPT)
+    \item \textbf{Diffusion models}: Stable Video Diffusion para generación de alta calidad
+    \item \textbf{Separación contenido-movimiento}: MoCoGAN
+  \end{itemize}
+    \begin{exampleblock}{La conexión}
+      En ambos casos, la comunidad convergió hacia:
+      \begin{enumerate}
+        \item \textbf{Comprimir} a un espacio latente (encoders)
+        \item \textbf{Modelar} en ese espacio comprimido (transformers, difusión)
+        \item \textbf{Decodificar} de vuelta a la señal original
+      \end{enumerate}
+    \end{exampleblock}
+\end{small}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN: DEEPFAKES Y ÉTICA
+%============================================================================
+

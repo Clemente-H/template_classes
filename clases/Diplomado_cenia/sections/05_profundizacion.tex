@@ -1,0 +1,188 @@
+\section{Profundización: Arquitecturas Específicas}
+
+\begin{frame}[fragile]{V2A: DeepMind Video-to-Audio (2024)}
+\begin{small}
+  \textbf{Pipeline completo del sistema:}
+
+  \begin{enumerate}
+    \item \textbf{Video Encoder}: Extrae features visuales de cada frame
+    \item \textbf{Audio Diffusion Decoder}: Genera espectrograma condicionado al video
+    \item \textbf{Vocoder neural}: Espectrograma → waveform de audio
+  \end{enumerate}
+
+  \vspace{0.2cm}
+
+  \textbf{Cómo resuelve la sincronización:}
+  \begin{itemize}
+    \item \textbf{Cross-attention audio-video}: El decodificador "mira" features visuales mientras genera audio
+    \item Aprende mapeos objeto → sonido (ej: olas grandes = volumen alto)
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Limitaciones actuales:}
+  \begin{itemize}
+    \item No maneja audio fuera de cuadro (off-screen)
+    \item Lucha con escenas muy complejas (múltiples fuentes sonoras)
+  \end{itemize}
+
+  \vspace{0.1cm}
+  \small \url{https://deepmind.google/blog/generating-audio-for-video/}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{A2V: Talking Heads con SadTalker (2023)}
+\begin{small}
+  \textbf{El problema}: Audio + foto → video de persona hablando
+
+  \vspace{0.2cm}
+
+  \textbf{Pipeline en 3 etapas:}
+  \begin{enumerate}
+    \item \textbf{Audio → Landmarks faciales}: Predice posición de labios, mandíbula por frame
+    \item \textbf{Landmarks → Movimiento 3D}: Head pose + expresión facial
+    \item \textbf{Render final}: Diffusion model pinta la persona con movimiento
+  \end{enumerate}
+
+  \vspace{0.2cm}
+
+  \textbf{Truco arquitectónico clave:}
+  \begin{itemize}
+    \item \textbf{Separación identidad-movimiento}: La foto define "quién", el audio define "cómo se mueve"
+    \item Similar a MoCoGAN que vieron (contenido vs movimiento)
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Desafíos no resueltos:}
+  \begin{itemize}
+    \item Mantener identidad exacta en videos largos (>30s)
+    \item Expresiones naturales (aún se ve "sintético")
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{T2AV: MovieGen (Meta, 2024)}
+\begin{small}
+  \textbf{El santo grial}: Texto → Video (30s) + Audio coherente
+
+  \vspace{0.2cm}
+
+  \textbf{Lo que sabemos de la arquitectura:}
+  \begin{itemize}
+    \item \textbf{Diffusion Transformer (DiT)}: Base arquitectónica para video
+    \item \textbf{Audio generado nativamente}: No es post-procesado separado
+    \item \textbf{Joint training}: Ambas modalidades desde el inicio
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Ejemplo de generación:}
+  \begin{itemize}
+    \item Prompt: "Un perro ladrando en un parque al atardecer"
+    \item Output video: Perro, parque, luz cálida (coherencia visual)
+    \item Output audio: Ladridos + ambiente de parque (coherencia sonora)
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Ventaja vs pipeline cascada:}
+  \begin{itemize}
+    \item No hay "teléfono descompuesto" (errores acumulativos)
+    \item Audio y video se "consultan" mutuamente durante generación
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Comparación de Enfoques}
+\begin{tiny}
+  \begin{table}
+  \begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \textbf{Enfoque} & \textbf{V2A} & \textbf{A2V} & \textbf{T2AV (joint)} & \textbf{T2AV (cascada)} \\ \hline
+  Sincronización & \cellcolor{yesgreen}Excelente & \cellcolor{partial}Depende landmarks & \cellcolor{yesgreen}Muy buena & \cellcolor{partial}Moderada \\ \hline
+  Calidad audio & \cellcolor{yesgreen}Alta & \cellcolor{no}Baja & \cellcolor{yesgreen}Alta & \cellcolor{yesgreen}Alta \\ \hline
+  Calidad video & N/A & \cellcolor{partial}Limitado & \cellcolor{yesgreen}Alta & \cellcolor{yesgreen}Muy alta \\ \hline
+  Flexibilidad & \cellcolor{no}Necesita video & \cellcolor{no}Necesita audio & \cellcolor{yesgreen}Solo texto & \cellcolor{yesgreen}Solo texto \\ \hline
+  Costo compute & Bajo & Bajo & Alto & Muy alto \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.15cm}
+
+  \begin{block}{Conclusión práctica}
+  \textbf{V2A}: Mejor para post-producción (ya tienes video)\\
+  \textbf{A2V}: Solo viable para talking heads (muy restringido)\\
+  \textbf{T2AV joint}: Futuro, pero requiere datasets masivos\\
+  \textbf{T2AV cascada}: Más factible open-source, menos coherente
+  \end{block}
+\end{tiny}
+\end{frame}
+
+\begin{frame}[fragile]{Datasets y Métricas}
+\begin{small}
+  \textbf{Datasets importantes para entrenar estos modelos:}
+  \begin{itemize}
+    \item \textbf{VGGSound}: 200k videos con audio sincronizado (YouTube)
+    \item \textbf{AudioSet}: 2M videos etiquetados por tipo de sonido
+    \item \textbf{AudioCaps}: Texto descriptivo de audio (para T2A)
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Métricas de evaluación:}
+  \begin{itemize}
+    \item \textbf{FVD} (Fréchet Video Distance): ¿Qué tan "real" se ve el video?
+    \item \textbf{CLAP score}: Similitud semántica audio-texto
+    \item \textbf{Sync-score}: ¿Labios sincronizados con audio? (para talking heads)
+    \item \textbf{IS} (Inception Score): Diversidad + calidad de frames
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \begin{alertblock}{Problema de las métricas}
+  No hay "una sola métrica" que capture coherencia audiovisual completa. Aún se requiere evaluación humana para casos complejos.
+  \end{alertblock}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Costos Computacionales}
+\begin{small}
+  \textbf{Realidad del entrenamiento (órdenes de magnitud):}
+
+  \vspace{0.2cm}
+
+  \textbf{Modelos open-source (reproducibles):}
+  \begin{itemize}
+    \item \textbf{Open-Sora}: ~200 GPU-días (A100) para versión base
+    \item \textbf{AudioLDM}: ~50 GPU-días (A100)
+    \item \textbf{Costo estimado}: \$50k-100k USD
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Modelos propietarios (estimado):}
+  \begin{itemize}
+    \item \textbf{Sora/Veo}: Probablemente 1000+ GPU-días
+    \item \textbf{Costo estimado}: Millones USD
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{Para investigación académica:}
+  \begin{itemize}
+    \item Fine-tuning pequeño: 1-4 GPUs × días (alcanzable)
+    \item Entrenar desde cero: Prohibitivo sin apoyo industrial
+  \end{itemize}
+
+  \vspace{0.1cm}
+  \begin{block}{La brecha abierto vs cerrado}
+  No es solo arquitectura: es principalmente \textbf{escala de datos y compute}.
+  \end{block}
+\end{small}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN: ARQUITECTURAS MODERNAS
+%============================================================================
+
