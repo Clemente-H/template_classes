@@ -1,0 +1,56 @@
+\usetheme[progressbar=frametitle]{metropolis}
+
+\definecolor{maincolor}{RGB}{30,30,30}
+% === COLORES INSTITUCIONALES ===
+\definecolor{DarkGreen}{RGB}{35, 56, 59} 
+\definecolor{lightGray}{RGB}{120,120,120}
+
+\setbeamercolor{frametitle}{fg=white,bg=DarkGreen}
+\setbeamercolor{progress bar}{fg=maincolor}
+
+% Footer minimalista: solo número
+\setbeamertemplate{footline}{
+  \hfill
+  \usebeamercolor[fg]{page number in head/foot}
+  \insertframenumber
+  \hspace{0.5cm}
+  \vspace{0.3cm}
+}
+
+\setbeamercolor{page number in head/foot}{fg=gray}
+
+
+
+\setbeamertemplate{navigation symbols}{}
+
+% =========================
+% Slide automático de sección
+% =========================
+
+\newif\ifsectionframe
+\sectionframetrue
+
+\AtBeginSection[]{
+  {
+    \setbeamercolor{background canvas}{bg=DarkGreen}
+    \color{white}
+    \usebackgroundtemplate{%
+      \color{DarkGreen}\vrule width\paperwidth height\paperheight
+    }
+
+    \begin{frame}[plain]
+      \vfill
+      \centering
+      {\usebeamerfont{section title}\insertsection}
+      \vfill
+    \end{frame}
+
+    \usebackgroundtemplate{}
+  }
+}
+
+
+
+\titlegraphic{\hfill\includegraphics[height=1.5cm]{images/logos/cenia_logo.png}}
+
+%\titlegraphic{\hfill\includegraphics[height=2.3cm]{images/logos/uchile_logo.png}}

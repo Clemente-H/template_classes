@@ -1,0 +1,287 @@
+\section{Modelos Generativos de Audio y Video}
+
+\begin{frame}{Motivación}
+\large
+Hasta ahora vimos audio y video como mundos separados.
+
+\vspace{0.5cm}
+
+\textbf{Pero en la realidad:}
+\begin{itemize}
+    \item Nunca percibimos audio sin video
+    \item Nunca interpretamos video sin sonido
+\end{itemize}
+
+\vspace{0.5cm}
+
+\textbf{Pregunta central de hoy:}
+
+\begin{block}{}
+¿Cómo generamos contenido audiovisual coherente?
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------
+
+\begin{frame}{El problema fundamental}
+\begin{itemize}
+    \item Audio y video tienen naturalezas muy distintas
+    \item Diferentes escalas temporales
+    \item Diferentes estructuras estadísticas
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{block}{Tensión central}
+¿Cómo alinear dos señales que viven en espacios tan distintos?
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Recap: lo mínimo necesario}
+
+\begin{frame}{Audio — lo esencial}
+\begin{itemize}
+    \item Señal 1D, alta resolución temporal
+    \item Difícil de modelar directamente
+    \item Solución moderna:
+    \begin{itemize}
+        \item Espectrogramas
+        \item Neural codecs (EnCodec)
+        \item Tokenización
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{Idea clave: transformar audio en una representación discreta.}
+\end{frame}
+
+% ------------------------------------------------------
+
+\begin{frame}{Video — lo esencial}
+\begin{itemize}
+    \item Secuencia de imágenes (tensor 4D)
+    \item Problema central: consistencia temporal
+    \item Soluciones modernas:
+    \begin{itemize}
+        \item VQ-VAE
+        \item Latent diffusion
+        \item Transformers espacio-temporales
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{El video no es solo imagen: es dinámica.}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{El problema real: unir modalidades}
+
+\begin{frame}{¿Por qué esto es difícil?}
+\begin{itemize}
+    \item Audio tiene más resolución temporal que video
+    \item Video tiene más información espacial
+    \item No hay correspondencia 1–1 entre ambos
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{block}{Problema central}
+La correspondencia audio–video es ambigua.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------
+
+\begin{frame}{Tres formas de unir audio y video}
+\begin{enumerate}
+    \item Video → Audio
+    \item Audio → Video
+    \item Texto → Audio + Video
+\end{enumerate}
+
+\vspace{0.3cm}
+Cada una tiene desafíos distintos.
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Video → Audio (V2A)}
+
+\begin{frame}{Video → Audio}
+\textbf{Idea:} generar sonido a partir de lo que se ve.
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Foley automático
+    \item Sonorización de videos mudos
+    \item Accesibilidad
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Desafíos del V2A}
+\begin{itemize}
+    \item Sincronización precisa
+    \item Ambigüedad (¿qué suena?)
+    \item Separar fondo vs acción
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{El video no contiene toda la información sonora.}
+\end{frame}
+
+\begin{frame}{Ejemplo: V2A de DeepMind}
+\begin{itemize}
+    \item Modelo entrenado con video + audio alineados
+    \item Aprende correlaciones visuales–sonoras
+    \item Aún limitado en escenas complejas
+\end{itemize}
+
+\small
+\url{https://deepmind.google/blog/generating-audio-for-video/}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Audio → Video (A2V)}
+
+\begin{frame}{Audio → Video}
+\textbf{Idea:} generar video desde sonido.
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Talking heads
+    \item Avatares
+    \item Visualización de música
+\end{itemize}
+\end{frame}
+
+\begin{frame}{El gran problema}
+\begin{block}{}
+Un mismo audio puede corresponder a infinitos videos.
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Ambigüedad extrema
+    \item Identidad visual
+    \item Expresividad
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solución práctica}
+\begin{itemize}
+    \item Restringir el dominio (caras)
+    \item Usar modelos condicionados
+    \item Separar identidad y movimiento
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Texto → Audio + Video}
+
+\begin{frame}{El objetivo final}
+\textbf{Texto → Video + Audio}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Texto es barato y flexible
+    \item Pero es altamente ambiguo
+    \item Requiere planificación temporal
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Por qué es difícil}
+\begin{itemize}
+    \item El texto no especifica timing
+    \item El audio y el video deben coincidir
+    \item Errores se acumulan
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{No basta con generar bien: hay que coordinar.}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Arquitecturas modernas}
+
+\begin{frame}{Open-Sora}
+\begin{itemize}
+    \item Modelo abierto
+    \item Basado en Diffusion Transformers
+    \item Entrenamiento multi-escala
+\end{itemize}
+
+\vspace{0.3cm}
+\url{https://arxiv.org/abs/2412.20404}
+\end{frame}
+
+\begin{frame}{Qué aporta Open-Sora}
+\begin{itemize}
+    \item Transparencia arquitectónica
+    \item Reproducibilidad
+    \item Base para investigación
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Modelos propietarios}
+\begin{itemize}
+    \item Sora (OpenAI)
+    \item Veo (Google)
+    \item Kling
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{Misma idea, más datos y más cómputo.}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Problemas abiertos}
+
+\begin{frame}{Lo que aún no está resuelto}
+\begin{itemize}
+    \item Sincronización perfecta
+    \item Consistencia a largo plazo
+    \item Comprensión física del sonido
+    \item Edición localizada
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Más allá del hype}
+\begin{itemize}
+    \item No entienden el mundo
+    \item Aprenden correlaciones
+    \item Son frágiles fuera del dominio
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------
+
+\section{Discusión}
+
+\begin{frame}{Preguntas para discutir}
+\begin{itemize}
+    \item ¿Esto es comprensión o imitación?
+    \item ¿Quién controla estos modelos?
+    \item ¿Cómo se regula el contenido generado?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Cierre}
+\begin{block}{Idea clave de la clase}
+El futuro no es audio o video, es audiovisual nativo.
+\end{block}
+
+\vspace{0.5cm}
+La pregunta ya no es si se puede generar…  
+sino \textbf{qué tipo de mundo estamos construyendo}.
+\end{frame}
