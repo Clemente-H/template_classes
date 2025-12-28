@@ -1,9 +1,21 @@
-\usetheme[progressbar=frametitle]{metropolis}
+\usetheme[progressbar=frametitle, sectionpage=simple]{metropolis}
+
+% Configuración importante para bloques (alertblock, block, exampleblock)
+\metroset{titleformat frame=smallcaps, block=fill}
 
 \definecolor{maincolor}{RGB}{30,30,30}
 % === COLORES INSTITUCIONALES ===
-\definecolor{DarkGreen}{RGB}{35, 56, 59} 
+\definecolor{DarkGreen}{RGB}{35, 56, 59}
 \definecolor{lightGray}{RGB}{120,120,120}
+
+% === COLORES ADICIONALES PARA BLOQUES Y TABLAS ===
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\definecolor{yesgreen}{rgb}{0.7, 0.9, 0.7}
+\definecolor{yes}{rgb}{0.8, 1.0, 0.8}
+\definecolor{no}{rgb}{1.0, 0.7, 0.7}
+\definecolor{partial}{rgb}{1.0, 0.9, 0.6}
+\definecolor{stable}{rgb}{0.7, 0.9, 0.7}
+\definecolor{unstable}{rgb}{1.0, 0.7, 0.7}
 
 \setbeamercolor{frametitle}{fg=white,bg=DarkGreen}
 \setbeamercolor{progress bar}{fg=maincolor}
