@@ -5,7 +5,7 @@ Designed for local use, easy reuse, and clean separation between content and sty
 
 ---
 
-## ✅ Requirements
+## Requirements
 
 * macOS
 * **MacTeX** installed
@@ -16,7 +16,7 @@ No additional configuration is required.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -36,7 +36,7 @@ No additional configuration is required.
 
 ---
 
-## ▶️ How to Use
+## How to Use
 
 ### 1. Create or edit a class
 
@@ -72,7 +72,7 @@ VS Code + LaTeX Workshop will:
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Theme & Layout
 
@@ -116,7 +116,7 @@ Their appearance is controlled in `theme.tex`.
 
 ---
 
-## ✅ Recommended Workflow
+## Recommended Workflow
 
 1. Duplicate this folder for a new course
 2. Edit `main.tex`
@@ -127,15 +127,9 @@ No need to touch the theme again.
 
 ---
 
-## ✨ Notes
+## Notes
 
 * Designed for academic lectures
 * Clean, minimal style
 * Works fully offline
 * Compatible with Overleaf if needed
-
----
-
-## Author
-
-Custom Beamer template for teaching and academic presentations
