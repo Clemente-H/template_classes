@@ -1,17 +1,22 @@
 \section{Profundización: Arquitecturas Específicas}
 
-\begin{frame}[fragile]{V2A: DeepMind Video-to-Audio (2024)}
-\begin{small}
-  \textbf{Pipeline completo del sistema:}
+\begin{frame}{V2A: DeepMind Video-to-Audio (2024)}
+  \begin{small}
 
+  \includegraphics[width=\textwidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/video2audiodeepmind.png}
+  \caption{Diagram of our V2A system \href{https://deepmind.google/blog/generating-audio-for-video/}{DeepMind 2024}}
+  \vspace{0.2cm}
+  \textbf{Pipeline completo del sistema:}
   \begin{enumerate}
     \item \textbf{Video Encoder}: Extrae features visuales de cada frame
     \item \textbf{Audio Diffusion Decoder}: Genera espectrograma condicionado al video
     \item \textbf{Vocoder neural}: Espectrograma → waveform de audio
   \end{enumerate}
+  \end{small}
+\end{frame}
 
-  \vspace{0.2cm}
-
+\begin{frame}[fragile]{V2A: DeepMind Video-to-Audio (2024)}
+\begin{small}
   \textbf{Cómo resuelve la sincronización:}
   \begin{itemize}
     \item \textbf{Cross-attention audio-video}: El decodificador "mira" features visuales mientras genera audio
@@ -30,7 +35,9 @@
   \small \url{https://deepmind.google/blog/generating-audio-for-video/}
 \end{small}
 \end{frame}
-
+%
+% hasta acá bien
+%
 \begin{frame}[fragile]{A2V: Talking Heads con SadTalker (2023)}
 \begin{small}
   \textbf{El problema}: Audio + foto → video de persona hablando
@@ -45,7 +52,16 @@
   \end{enumerate}
 
   \vspace{0.2cm}
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/sadtalker.png}
+    \caption{\footnotesize Diagram of our V2A system \href{https://github.com/OpenTalker/SadTalker}{SadTalker}}
+  \end{center}
+  \end{small}
+\end{frame}
 
+
+\begin{frame}[fragile]{A2V: Talking Heads con SadTalker (2023)}
+  \begin{small}
   \textbf{Truco arquitectónico clave:}
   \begin{itemize}
     \item \textbf{Separación identidad-movimiento}: La foto define "quién", el audio define "cómo se mueve"
@@ -62,62 +78,8 @@
 \end{small}
 \end{frame}
 
-\begin{frame}[fragile]{T2AV: MovieGen (Meta, 2024)}
-\begin{small}
-  \textbf{El santo grial}: Texto → Video (30s) + Audio coherente
-
-  \vspace{0.2cm}
-
-  \textbf{Lo que sabemos de la arquitectura:}
-  \begin{itemize}
-    \item \textbf{Diffusion Transformer (DiT)}: Base arquitectónica para video
-    \item \textbf{Audio generado nativamente}: No es post-procesado separado
-    \item \textbf{Joint training}: Ambas modalidades desde el inicio
-  \end{itemize}
-
-  \vspace{0.2cm}
-
-  \textbf{Ejemplo de generación:}
-  \begin{itemize}
-    \item Prompt: "Un perro ladrando en un parque al atardecer"
-    \item Output video: Perro, parque, luz cálida (coherencia visual)
-    \item Output audio: Ladridos + ambiente de parque (coherencia sonora)
-  \end{itemize}
-
-  \vspace{0.2cm}
-
-  \textbf{Ventaja vs pipeline cascada:}
-  \begin{itemize}
-    \item No hay "teléfono descompuesto" (errores acumulativos)
-    \item Audio y video se "consultan" mutuamente durante generación
-  \end{itemize}
-\end{small}
-\end{frame}
-
-\begin{frame}[fragile]{Comparación de Enfoques}
-\begin{tiny}
-  \begin{table}
-  \begin{tabular}{|l|c|c|c|c|}
-  \hline
-  \textbf{Enfoque} & \textbf{V2A} & \textbf{A2V} & \textbf{T2AV (joint)} & \textbf{T2AV (cascada)} \\ \hline
-  Sincronización & \cellcolor{yesgreen}Excelente & \cellcolor{partial}Depende landmarks & \cellcolor{yesgreen}Muy buena & \cellcolor{partial}Moderada \\ \hline
-  Calidad audio & \cellcolor{yesgreen}Alta & \cellcolor{no}Baja & \cellcolor{yesgreen}Alta & \cellcolor{yesgreen}Alta \\ \hline
-  Calidad video & N/A & \cellcolor{partial}Limitado & \cellcolor{yesgreen}Alta & \cellcolor{yesgreen}Muy alta \\ \hline
-  Flexibilidad & \cellcolor{no}Necesita video & \cellcolor{no}Necesita audio & \cellcolor{yesgreen}Solo texto & \cellcolor{yesgreen}Solo texto \\ \hline
-  Costo compute & Bajo & Bajo & Alto & Muy alto \\ \hline
-  \end{tabular}
-  \end{table}
-
-  \vspace{0.15cm}
-
-  \begin{block}{Conclusión práctica}
-  \textbf{V2A}: Mejor para post-producción (ya tienes video)\\
-  \textbf{A2V}: Solo viable para talking heads (muy restringido)\\
-  \textbf{T2AV joint}: Futuro, pero requiere datasets masivos\\
-  \textbf{T2AV cascada}: Más factible open-source, menos coherente
-  \end{block}
-\end{tiny}
-\end{frame}
+%% aca ahora 
+% -----------------
 
 \begin{frame}[fragile]{Datasets y Métricas}
 \begin{small}

@@ -14,36 +14,136 @@
 
   \textbf{Veremos cómo los modelos modernos atacan estos problemas:}
   \begin{enumerate}
+    \item \textbf{Meta Movie Gen}
     \item \textbf{Open-Sora}: Transparencia en la arquitectura
     \item \textbf{Sistemas propietarios}: Sora, Veo3, Kling
     \item \textbf{Tendencias arquitectónicas comunes}
   \end{enumerate}
 \end{frame}
 
-\begin{frame}[fragile]{Open-Sora: ¿Por Qué Es Relevante?}
+\begin{frame}[fragile]{Veo3.1: Google DeepMind}
 \begin{small}
-  Paper: \url{https://arxiv.org/pdf/2412.20404}
+    Veo 3 es uno de los sistemas comerciales que genera audio y video simultáneamente desde texto.
+  \begin{figure}
+        \includegraphics[width=.9\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/veo3diagrama.png}
+        \caption{\footnotesize Diagrama alto nivel arquitectura Veo 3.1}
+      \end{figure}
+\end{small}
+\end{frame}
 
-  Repositorio: \url{https://github.com/hpcaitech/Open-Sora}
+\begin{frame}[fragile]{Veo3.1: Google DeepMind}
+\begin{small}
+  \begin{figure}
+        \includegraphics[width=.4\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/veo3diagrama.png}
+        \caption{\footnotesize Diagrama alto nivel arquitectura Veo 3.1}
+      \end{figure}
+  \textbf{Pipeline completo del sistema:}
+  \begin{enumerate}
+    \item \textbf{Encoder UL2}: Procesa texto prompt → embedding multimodal
+    \item \textbf{Video + Audio Encoder}: Comprimen señales a espacios latentes separados
+    \item \textbf{Latent Diffusion Model}: Transformer-based, aplica difusión \textit{conjuntamente} sobre:
+    \begin{itemize}
+      \item Latentes espacio-temporales de video (4D: tiempo × alto × ancho × canales)
+      \item Latentes temporales de audio (2D: tiempo × frecuencia)
+    \end{itemize}
+    \item \textbf{Decoders}: Reconstruyen video (1080p, hasta 8s) + audio (44.1kHz)
+  \end{enumerate}
+\end{small}
+\end{frame}
 
-  \vspace{0.3cm}
+\begin{frame}[fragile]{Veo 3: Arquitectura Detallada (Google DeepMind)}
+\begin{small}
+  \begin{block}{Diferencia clave vs competencia}
+  No son dos modelos separados "pegados": \textbf{un solo transformer} procesa ambas modalidades en el espacio latente, garantizando sincronización nativa.
+  \end{block}
+\end{small}
+\end{frame}
 
-  \textbf{¿Por qué estudiarlo?}
+\begin{frame}[fragile]{Veo 3: Latent Diffusion Multimodal}
+\begin{small}
+  \textbf{¿Cómo funciona la difusión conjunta?}
+
+  \textbf{Proceso de entrenamiento:}
   \begin{itemize}
-    \item \textbf{Es open-source}: Pueden experimentar y ver el código
-    \item \textbf{Documenta las decisiones arquitectónicas} que los sistemas cerrados no revelan
-    \item \textbf{Representa el estado del arte abierto}
+    \item Se agrega ruido gaussiano \textit{simultáneamente} a latentes de video y audio
+    \item El transformer aprende a predecir el ruido en ambas modalidades
+    \item \textbf{Cross-attention} entre latentes: el audio "mira" features de video y viceversa
+    \item Resultado: coherencia temporal y semántica automática
   \end{itemize}
 
-  \vspace{0.3cm}
-
-  \textbf{Componentes clave:}
+  \textbf{Durante la generación (sampling):}
   \begin{itemize}
-    \item \textbf{Diffusion Transformer (DiT)} para video
-    \item \textbf{Integración de condicionamiento temporal}
-    \item \textbf{Estrategias de entrenamiento multi-escala}
+    \item Input: Ruido gaussiano (video + audio)
+    \item Iteración denoising: ~50-100 pasos (similar a Stable Diffusion)
+    \item En cada paso, el modelo "consulta" ambas modalidades para mantener coherencia
+  \end{itemize}
+
+  \begin{exampleblock}{Ventaja práctica}
+  Si el video muestra una puerta cerrándose, el audio genera el sonido del cierre \textit{exactamente} en el frame correcto, sin post-procesamiento.
+  \end{exampleblock}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Veo 3: Datos, Seguridad y Evaluación}
+\begin{small}
+  \textbf{Datos de entrenamiento:}
+  \begin{itemize}
+    \item \textbf{Dataset}: Millones de videos con audio (no especifican cantidad exacta)
+    \item \textbf{Captions}: Generados con múltiples modelos Gemini en diferentes niveles de detalle
+    \item \textbf{Filtrado agresivo}: Safety metrics, PII removal, semantic deduplication
+  \end{itemize}
+
+  \textbf{Evaluaciones de seguridad (Tech Report):}
+  \begin{itemize}
+    \item \textbf{Content Safety}: Evaluado contra datasets adversariales (violencia, hate speech, CSAM)
+    \item \textbf{Fairness}: 140 profesiones × 16 videos/c.u. → análisis de representatividad demográfica
+    \item \textbf{Red teaming}: Equipos internos + participantes externos buscando vulnerabilidades
+  \end{itemize}
+
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{Veo 3: Datos, Seguridad y Evaluación}
+\begin{small}
+  \textbf{Mitigaciones en producción:}
+  \begin{itemize}
+    \item \textbf{SynthID watermarking}: Marca de agua embebida en video generado
+    \item \textbf{Production filtering}: Clasificador multimodal detecta violaciones de políticas
   \end{itemize}
 \end{small}
+\end{frame}
+
+
+\begin{frame}[fragile]{Open-Sora: ¿Por Qué Es Relevante?}
+  \begin{small}
+    \begin{columns}[T] % Alineación superior
+      \begin{column}{.55\textwidth}
+        \textbf{¿Por qué estudiarlo?}
+        \begin{itemize}
+          \item \textbf{Open-source}: Acceso total al código y experimentación.
+          \item \textbf{Transparencia}: Documenta decisiones arquitectónicas que sistemas cerrados ocultan.
+          \item \textbf{Estado del arte}: Referencia actual en modelos abiertos.
+        \end{itemize}
+
+        \bigskip % Espacio vertical claro
+
+        \textbf{Componentes clave:}
+        \begin{itemize}
+          \item \textbf{Diffusion Transformer (DiT)} adaptado a video.
+          \item \textbf{Condicionamiento temporal} integrado.
+          \item \textbf{Entrenamiento multi-escala}.
+        \end{itemize}
+      \end{column}
+
+      \begin{column}{.45\textwidth}
+        \begin{figure}
+          \centering
+          \includegraphics[width=\textwidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/opensora.png}
+          \caption{\scriptsize Arquitectura abierta para generación T2V/T2A.}
+        \end{figure}
+      \end{column}
+    \end{columns}
+  \end{small}
 \end{frame}
 
 \begin{frame}[fragile]{Open-Sora: ¿Qué Resuelve de los Problemas Clásicos?}
@@ -75,21 +175,153 @@
 \end{small}
 \end{frame}
 
-\begin{frame}[fragile]{Sistemas Propietarios: Sora, Veo3, Kling}
+
+% ============================================================
+% MovieGen Meta
+% ============================================================
+
+\begin{frame}[fragile]{MovieGen Meta: Un Sistema Completo de Generación}
 \begin{small}
-  \textbf{Lo que sabemos (y lo que no):}
+  \textbf{MovieGen (Meta, 2024):} Suite de modelos foundation para generación multimodal
+
+  \begin{columns}[T]
+    \begin{column}{.55\textwidth}
+      \textbf{Capacidades principales:}
+      \begin{itemize}
+        \item \textbf{Video HD 1080p}: Hasta 16s @ 16 FPS
+        \item \textbf{Audio sincronizado}: 48kHz, efectos + música
+        \item \textbf{Personalización}: Videos con rostros específicos
+        \item \textbf{Edición precisa}: Video-to-video con instrucciones
+      \end{itemize}
+
+      \vspace{0.2cm}
+
+      \textbf{Dos modelos foundation:}
+      \begin{enumerate}
+        \item \textbf{MovieGen Video}: 30B parámetros
+        \item \textbf{MovieGen Audio}: 13B parámetros
+      \end{enumerate}
+    \end{column}
+
+    \begin{column}{.45\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/moviegen_overview_capabilities.png}
+        \caption{\scriptsize Figura 1 del paper: ejemplos de video, audio sincronizado, personalización y edición}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{MovieGen Video: Arquitectura de 30B Parámetros}
+\begin{small}
+  \textbf{Pipeline completo:} Generación en espacio latente comprimido
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=.9\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/moviegen_architecture_pipeline.png}
+    \caption{\scriptsize TAE encoder, Transformer con cross-attention, TAE decoder}
+  \end{figure}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{MovieGen Video: Arquitectura de 30B Parámetros}
+  \begin{small}
+    \textbf{Componentes clave:}
+    \begin{enumerate}
+      \item \textbf{Temporal AutoEncoder (TAE)}: Compresión 8× espacio-temporal
+      \begin{itemize}
+        \item Video $(T' \times 3 \times H' \times W') \rightarrow$ Latente $(T \times 16 \times H \times W)$
+        \item Mismo TAE para imágenes y videos
+      \end{itemize}
+      \item \textbf{Transformer (30B)}: Basado en arquitectura LLaMa3
+      \begin{itemize}
+        \item 48 layers, 6144 dimensiones, RMSNorm + SwiGLU
+        \item Cross-attention para conditioning de texto
+      \end{itemize}
+      \item \textbf{Flow Matching}: Objetivo de entrenamiento (no difusión)
+    \end{enumerate}
+  \end{small}
+\end{frame}
+
+\begin{frame}[fragile]{MovieGen: Training Recipe Multi-Etapa}
+\begin{small}
+  \begin{columns}[T]
+    \begin{column}{.5\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/moviegen_training_recipe.png}
+        \caption{\scriptsize Figura 2 del paper: Pipeline de entrenamiento progresivo}
+      \end{figure}
+    \end{column}
+
+    \begin{column}{.5\textwidth}
+      \textbf{Estrategia de entrenamiento:}
+      \begin{enumerate}
+        \item \textbf{Pre-training T2I}: 256 px imágenes
+        \item \textbf{Pre-training conjunto}: T2I + T2V a 256 px
+        \item \textbf{High-res training}: Escala a 768 px, videos hasta 16s
+        \item \textbf{Finetuning}: Datos curados de alta calidad
+        \item \textbf{Post-training}: Personalización y edición
+      \end{enumerate}
+    \end{column}
+  \end{columns}
 
   \vspace{0.3cm}
 
-  \textbf{Arquitectura probable:}
+  \textbf{Datos de entrenamiento:}
   \begin{itemize}
-    \item Probablemente \textbf{DiT-based} (Diffusion Transformers)
-    \item Entrenamiento en datasets masivos propietarios
-    \item \textbf{Generación de audio nativa} (no post-procesado)
+    \item \textbf{Pre-training}: $\sim$100M videos + $\sim$1B imágenes
+    \item \textbf{Context length}: Hasta 73K tokens (768×768 px, 256 frames comprimidos)
+    \item \textbf{Infraestructura}: Hasta 6,144 GPUs H100
+  \end{itemize}
+\end{small}
+\end{frame}
+
+\begin{frame}[fragile]{MovieGen: Innovaciones Técnicas Clave}
+\begin{small}
+  \textbf{1. Temporal AutoEncoder (TAE) con mejoras:}
+  \begin{itemize}
+    \item \textbf{Outlier Penalty Loss}: Elimina artefactos "spot" en videos
+    \item \textbf{Temporal tiling}: Permite encode/decode de videos largos eficientemente
+    \item \textbf{16 canales latentes}: Mayor capacidad vs VAEs estándar (4-8 canales)
   \end{itemize}
 
-  \vspace{0.3cm}
+  \begin{figure}
+    \centering
+    \includegraphics[width=.6\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/moviegen_tae_tiling_inference.png}
+    \caption{\scriptsize Tiled inference con overlap y blending para videos largos}
+  \end{figure}
 
+  \end{small}
+  \end{frame}
+
+  \begin{frame}[fragile]{MovieGen: Innovaciones Técnicas Clave}
+  \begin{small}
+  \textbf{2. Model Parallelism para escala extrema:}
+  \begin{itemize}
+    \item \textbf{Tensor Parallelism + Sequence Parallelism + Context Parallelism}
+    \item Permite entrenar con 73K tokens de contexto (comparable a LLMs modernos)
+    \item Custom implementation en PyTorch compilado a CUDAGraphs
+  \end{itemize}
+
+  \textbf{3. Flow Matching vs Diffusion:}
+  \begin{itemize}
+    \item Zero terminal SNR nativo (sin ajustes de noise schedule)
+    \item Más robusto y simple que diffusion para video
+  \end{itemize}
+\end{small}
+\end{frame}
+
+% ============================================================
+% End MovieGen Meta
+% ============================================================
+
+
+
+\begin{frame}[fragile]{Sistemas Propietarios: Sora, Veo3, Kling}
+\begin{small}
   \textbf{La brecha open vs closed:}
   \begin{itemize}
     \item \textbf{Calidad de datos de entrenamiento}: Probablemente órdenes de magnitud más datos
@@ -105,43 +337,6 @@
   \end{alertblock}
 \end{small}
 \end{frame}
-
-\begin{frame}[fragile]{Tendencias Arquitectónicas Comunes}
-\begin{small}
-  Más allá de los modelos específicos, hay patrones claros:
-
-  \textbf{1. Diffusion Transformers (DiT):}
-  \begin{itemize}
-    \item Reemplaza U-Net (de Stable Diffusion) con transformers puros
-    \item Mejor escalabilidad y consistencia temporal
-  \end{itemize}
-
-  \vspace{0.2cm}
-
-  \textbf{2. Latent representations:}
-  \begin{itemize}
-    \item Nadie modela píxeles directamente
-    \item VAE o codecs neurales (como EnCodec para audio)
-  \end{itemize}
-
-  \vspace{0.2cm}
-
-  \textbf{3. Multi-modal training:}
-  \begin{itemize}
-    \item Entrenamiento conjunto de audio y video desde el inicio
-    \item No "pegar" dos modelos separados
-  \end{itemize}
-
-  \vspace{0.2cm}
-
-  \textbf{4. Progressive training:}
-  \begin{itemize}
-    \item Empezar simple (corto, baja resolución)
-    \item Gradualmente aumentar complejidad
-  \end{itemize}
-\end{small}
-\end{frame}
-
 % ============================================================================
 % SECCIÓN: PROBLEMAS ABIERTOS
 %============================================================================

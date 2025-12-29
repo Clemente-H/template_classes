@@ -24,6 +24,70 @@
   Comprimir → Modelar en espacio comprimido → Decodificar
   \end{exampleblock}
 \end{small}
+
+\end{frame}
+
+\begin{frame}{Especificidades del Audio \href{https://github.com/valbarriere/CC6XXX-Generative-AI}{$valbarriere$}}
+% ¿Qué hace única al aprendizaje de representaciones de voz?
+\begin{itemize}
+    \item Las entradas de voz tienen un número variable de unidades léxicas por secuencia.
+    \item La voz es una secuencia larga que no tiene límites de segmentos.
+    \item La voz es continua sin un diccionario predefinido de unidades para modelar explícitamente en el entorno auto-supervisado.
+    \item Las tareas de procesamiento de voz pueden requerir información ortogonal, ej., ASR e identificación de hablante. 
+\end{itemize}
+\begin{figure}
+    % \centering
+    \hspace*{-.5cm}
+    \includegraphics[width=1.1\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/speech_words.png}
+    \caption{La voz es continua mientras que el texto es discreto}
+\end{figure}
+
+\end{frame}
+
+
+% ---------------- Diapositiva 1 ----------------
+\begin{frame}[t]{¿Qué son los Datos de Audio? \href{https://github.com/valbarriere/CC6XXX-Generative-AI}{$valbarriere$} }
+      % \large
+      \begin{itemize}
+        \item El sonido es una onda continua — las computadoras lo almacenan como una serie de números (muestras).  
+        \item La \textbf{frecuencia de muestreo} define cuántas veces por segundo capturamos la señal.  
+        \item El arreglo resultante de valores forma una \textbf{forma de onda}.  
+        \item Cada punto representa amplitud — qué tan "fuerte" es el sonido en un instante dado.  
+        \item Esta representación digital permite a los modelos de IA \textbf{analizar, generar o entender} el sonido.
+      \end{itemize}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.49\textwidth}
+      \begin{figure}
+        \includegraphics[width=.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/continuous_vs_discrete.png}
+        \caption{\footnotesize Sonido continuo vs discreto}
+      \end{figure}
+     \end{column}
+    \begin{column}{0.49\textwidth}
+      \vspace{4pt}
+      \begin{figure}
+        \includegraphics[width=.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/trumpet_waveform.png}
+        \caption{\footnotesize Forma de onda: tiempo vs amplitud}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------------- Diapositiva 2 ----------------
+\begin{frame}[t]{Espectrograma: Forma clásica de entender los Sonidos \href{https://github.com/valbarriere/CC6XXX-Generative-AI}{$valbarriere$}}
+
+  \textbf{¿Por qué procesar audio?}
+  \begin{itemize}
+    \item Los modelos no pueden interpretar el sonido crudo directamente — lo convertimos en \textbf{características}.  
+    \item La vista más común: el \textbf{espectrograma} — tiempo en un eje, frecuencia en el otro.  
+    \item Un \textbf{espectrograma mel} remodela las frecuencias para coincidir con la audición humana.  
+    \item Estas representaciones hacen que la voz, la música y los sonidos ambientales sean medibles y aprendibles.  
+    % \item Los sistemas de escucha automática (ej., Whisper, Wav2Vec 2.0) se basan en estas transformaciones básicas.
+  \end{itemize}
+
+\begin{figure}
+    \includegraphics[width=.7\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/mel_spectrogram.png}
+    % \caption*{\footnotesize Espectrograma mel — figura de "Audio Data" de Hugging Face.}
+\end{figure}
 \end{frame}
 
 \begin{frame}[fragile]{Video — Lo Esencial}
@@ -51,6 +115,37 @@
 \end{small}
 \end{frame}
 
+\begin{frame}{Algunos Ejemplos de Gen Video}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.49\textwidth}
+      \begin{figure}
+        \includegraphics[width=.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/obama.png}
+        \caption{\footnotesize Synthesizing Obama: Learning Lip Sync from Audio }
+      \end{figure}
+     \end{column}
+    \begin{column}{0.49\textwidth}
+      \vspace{4pt}
+      \begin{figure}
+        \includegraphics[width=.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/images/mocogan.png}
+        \caption{\footnotesize MoCoGAN}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Uniendo Modalidades}
+\begin{small}
+  \textbf{Desafío de hoy: Unir Audio y Video}
+    \begin{exampleblock}{¿Cómo los alineamos? ¿Cómo los generamos juntos?}
+      Veremos tres enfoques recientes que abordan este desafío:
+      \begin{enumerate}
+        \item \textbf{Video2Audio} Dado un video, generar audio sincronizado
+        \item \textbf{Audio2Video} Dado un audio, generar video sincronizado
+        \item \textbf{Generacion en simultaneo} modelos que realizan generación conjunta
+      \end{enumerate}
+    \end{exampleblock}
+\end{small}
+\end{frame}
 % ============================================================================
 % SECCIÓN: DEEPFAKES Y ÉTICA
 %============================================================================
