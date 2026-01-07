@@ -1,0 +1,261 @@
+% ============================================================================
+% SECCIÓN 5: CICLO DE ENTRENAMIENTO COMÚN
+% Usar imagen del paper OLMo del flujo base → instruction → preference
+%============================================================================
+
+\section{El Ciclo de Entrenamiento de un LLM}
+
+\begin{frame}
+  \frametitle{Super, Tenemos Noción de Entrenamiento y Recursos}
+
+  Ya sabemos:
+  \begin{itemize}
+    \item Training ≠ Inference (3-4× más memoria)
+    \item VRAM es el cuello de botella
+    \item Batch size y sequence length impactan memoria
+    \item Hay frameworks que nos ayudan con paralelismo
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Pero también viene nuestro enfoque!}
+    \textbf{¿Qué queremos hacer y cómo lo vamos a hacer?}
+
+    \vspace{0.2cm}
+
+    Es distinto hacer un \alert{modelo fundacional} que \alert{fine-tunear} un modelo existente
+  \end{block}
+
+  \vspace{0.3cm}
+
+  Veamos algunas distinciones importantes
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ciclo de Entrenamiento Común}
+
+  % TODO: Usuario proporcionará imagen del paper OLMo del flujo
+  % Placeholder para la imagen
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/olmo_flujo.png}
+    \caption{Ciclo de entrenamiento típico de un LLM (basado en OLMo paper \cite{olmo3_blog})}
+  \end{figure}
+
+  \vspace{0.3cm}
+
+  Usualmente el ciclo compone: \alert{Base → Instruction → Preference}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Fase 1: Base Pre-training}
+
+  \textbf{Objetivo:} Aprender la estructura del lenguaje
+
+  \vspace{0.3cm}
+
+  \begin{block}{Características}
+    \begin{itemize}
+      \item \textbf{Datos:} Texto crudo de internet (web scrapes, libros, código)
+      \item \textbf{Escala:} Trillones de tokens (6T - 15T típicamente)
+      \item \textbf{Tarea:} Predecir siguiente token (autoregresive language modeling)
+      \item \textbf{Duración:} Semanas o meses con cientos/miles de GPUs
+      \item \textbf{Costo:} Millones de dólares
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Resultado}
+    Un modelo que sabe gramática, hechos del mundo, razonamiento básico... pero \alert{no sigue instrucciones}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{Ejemplos:} GPT-3, Llama 3.1 Base, OLMo 3 Base, DeepSeek-V3 Base
+\end{frame}
+
+\begin{frame}
+  \frametitle{Fase 2: Instruction Tuning (SFT)}
+
+  \textbf{Objetivo:} Enseñar al modelo a seguir instrucciones
+
+  \vspace{0.3cm}
+
+  \begin{block}{Características}
+    \begin{itemize}
+      \item \textbf{Datos:} Pares (instrucción, respuesta) curados por humanos
+      \item \textbf{Escala:} Miles a millones de ejemplos (mucho menor que pre-training)
+      \item \textbf{Tarea:} Supervised fine-tuning - aprender formato de chat/asistente
+      \item \textbf{Duración:} Horas a días
+      \item \textbf{Costo:} Mucho más barato que pre-training
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Resultado}
+    Un modelo que responde a preguntas, sigue instrucciones, tiene formato de chat... pero \alert{no optimizado para preferencias humanas}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{Ejemplos:} Llama 3.1 Instruct, OLMo 3 Instruct, Falcon3 Instruct
+\end{frame}
+
+\begin{frame}
+  \frametitle{Fase 3: Preference Alignment (DPO/RLHF)}
+
+  \textbf{Objetivo:} Alinear el modelo con preferencias humanas
+
+  \vspace{0.3cm}
+
+  \begin{block}{Características}
+    \begin{itemize}
+      \item \textbf{Datos:} Comparaciones de respuestas (mejor vs peor)
+      \item \textbf{Escala:} Decenas/cientos de miles de comparaciones
+      \item \textbf{Tarea:} Optimizar para que genere respuestas preferidas
+      \item \textbf{Técnicas:} DPO, RLHF, Constitutional AI
+      \item \textbf{Duración:} Horas a días
+      \item \textbf{Costo:} Comparable a instruction tuning
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Resultado}
+    Un modelo que genera respuestas \alert{útiles, honestas, inofensivas} y alineadas con valores humanos
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{Ejemplos:} ChatGPT, Claude, Llama 3.3 (con DPO), OLMo 3.1 (con RL)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Mitigadores de Seguridad en Cada Fase}
+
+  En cada sección se usan \textbf{mitigadores de seguridad} para evitar comportamientos no deseados:
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item \textbf{Pre-training:} Filtrado de datos (remover contenido tóxico, ilegal)
+    \item \textbf{Instruction Tuning:} Ejemplos de rechazo ("Lo siento, no puedo ayudar con eso")
+    \item \textbf{Preference Alignment:} Optimizar para rechazar requests dañinos
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Nota}
+    \alert{No nos enfocaremos en seguridad} en esta clase, pero es un componente crucial en producción
+  \end{block}
+
+  \vspace{0.3cm}
+
+  Temas relacionados: Red-teaming, Constitutional AI, Safety fine-tuning, Content filtering
+\end{frame}
+
+\begin{frame}
+  \frametitle{Recursos por Fase: Comparación}
+
+  \begin{table}[h!]
+  \centering
+  \tiny
+  \begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \textbf{Fase} & \textbf{Datos} & \textbf{GPU Hours} & \textbf{Costo} & \textbf{Accesibilidad} \\ \hline
+  \textbf{Base Pre-training} &
+  6-15T tokens &
+  234k - 30M+ &
+  \$1M - \$10M+ &
+  \alert{Solo grandes labs} \\ \hline
+  \textbf{Instruction Tuning} &
+  10k - 1M ejemplos &
+  100s - 10k &
+  \$100 - \$50k &
+  \alert{Accesible} \\ \hline
+  \textbf{Preference Alignment} &
+  10k - 100k comparaciones &
+  100s - 10k &
+  \$100 - \$50k &
+  \alert{Accesible} \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Mensaje clave}
+    \begin{itemize}
+      \item \textbf{Pre-training:} Inaccesible para la mayoría (millones de \$)
+      \item \textbf{Fine-tuning (Instruction + Preference):} \alert{Muy accesible} con técnicas modernas
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Estrategia común}
+    \begin{enumerate}
+      \item Partir de un modelo base open-source (Llama, OLMo, Qwen, Falcon)
+      \item Hacer instruction tuning en tu dominio específico
+      \item Opcional: preference alignment para tu caso de uso
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ejemplo Concreto: OLMo 3 → OLMo 3.1}
+
+  \textbf{OLMo 3 (Base + Instruct):}
+  \begin{itemize}
+    \item Pre-training 32B: 1.05M H100-hours, \$2.75M
+    \item Instruction tuning: (relativamente barato)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{OLMo 3.1 (Extended RL training):}
+  \begin{itemize}
+    \item Continuó entrenamiento por 21 días adicionales
+    \item 224 GPUs (mucho menor que 1,024 para base)
+    \item Mejoras significativas en reasoning benchmarks
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Lección}
+    Partiendo de un modelo base existente, puedes hacer \alert{mejoras significativas} con recursos \alert{mucho menores} que el pre-training original
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \small
+  Fuente: \cite{olmo3_blog}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Resumen: Ciclo de Entrenamiento}
+
+  \begin{enumerate}
+    \item \textbf{Base Pre-training:} Billones de tokens, millones de \$, inaccesible
+    \item \textbf{Instruction Tuning:} Miles de ejemplos, accesible, enseña formato
+    \item \textbf{Preference Alignment:} Comparaciones, accesible, alinea con humanos
+  \end{enumerate}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Estrategia práctica}
+    \begin{enumerate}
+      \item Usa un modelo base open-source
+      \item Fine-tunea para tu dominio
+      \item Usa técnicas de optimización (que veremos ahora)
+    \end{enumerate}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Siguiente sección}
+    \alert{Técnicas de optimización} que hacen el fine-tuning aún más accesible
+  \end{block}
+\end{frame}

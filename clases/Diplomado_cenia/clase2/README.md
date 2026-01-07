@@ -1,163 +1,249 @@
 # Clase 2: Entrenamiento de LLMs - Infraestructura y Tips
 
 ## Descripción
-Clase teórica de 1.5 horas sobre infraestructura y técnicas de optimización para entrenar y deployar LLMs.
+Clase teórica de 1.5 horas sobre infraestructura, recursos computacionales y técnicas de optimización para entrenar y deployar LLMs. **Basada en mi_plan.md** con enfoque en ejemplos concretos y flujo narrativo.
 
 ## Estructura de Archivos
 
 ```
 clase2/
-├── train_and_infra_llms.tex          # Archivo principal que importa todas las secciones
-├── sections/                          # Secciones individuales de la clase
-│   ├── 01_introduccion.tex           # Hardware vs Software, motivación (101 líneas)
-│   ├── 02_hardware_recursos.tex      # GPUs, VRAM, cálculos de memoria (319 líneas)
-│   ├── 03_tecnicas_optimizacion.tex  # Quantization, LoRA, QLoRA (341 líneas)
-│   ├── 04_deployment.tex             # vLLM, TGI, conceptos de serving (316 líneas)
-│   └── 05_recapitulacion.tex         # Resumen y mensajes clave (130 líneas)
-└── drafts_and_context/               # Material de referencia
-    ├── guia_clase_teorica.md         # Guía detallada de la clase con timings
-    ├── NOTA_IMAGENES.md              # Instrucciones para copiar imágenes
-    ├── 3-Efficiency&DeploymentGENAI (1).tex  # Material de referencia original
-    ├── diapo1.png - diapo6.png       # Imágenes adicionales de referencia
-    └── resumen_transcripcion_colega.txt
+├── train_and_infra_llms.tex          # Archivo principal que importa secciones
+├── referencias_entrenamiento.bib     # Referencias bibliográficas con datos reales
+├── sections/                          # Secciones individuales (9 archivos)
+│   ├── 01_intro_motivacional.tex     # Costos reales de entrenamiento (10 min)
+│   ├── 02_training_vs_inference.tex  # Distinción crucial (5 min)
+│   ├── 03_hardware.tex               # GPUs, VRAM, calculadora (20 min)
+│   ├── 04_software_librerias.tex     # Frameworks brevemente (5 min)
+│   ├── 05_ciclo_entrenamiento.tex    # Base → Instruction → Preference (10 min)
+│   ├── 06_tecnicas_optimizacion.tex  # LoRA, Quantization, QLoRA (30 min)
+│   ├── 07_evaluaciones.tex           # MMLU, MT-Bench, leaderboards (5 min)
+│   ├── 08_deployment_recursos.tex    # vLLM, herramientas (10 min)
+│   └── 09_cierre.tex                 # Resumen, próximo lab (5 min)
+└── drafts_and_context/
+    ├── mi_plan.md                    # Plan original del usuario
+    ├── guia_clase_teorica.md         # Guía anterior (referencia)
+    └── NOTA_IMAGENES.md              # Instrucciones para imágenes
 
-## Contenido de la Clase (1.5 horas)
+## Contenido de la Clase (1.5 horas) - Basado en mi_plan.md
 
-### 1. Introducción (5-7 min)
-- Diferenciación Hardware vs Software
-- Los 3 pasos del entrenamiento (Forward, Backward, Optimization)
-- Motivación: GPT-3 costó $4.6M pero hoy es más accesible
+### 1. Introducción Motivacional (10 min)
+**Objetivo:** Mostrar ejemplos concretos de costos de entrenamiento
 
-### 2. Hardware y Recursos Computacionales (25-30 min)
+#### Modelos Grandes (Como referencia):
+- **GPT-3 (175B):** $1.1M - $4.6M, 355 GPU-years V100
+- **Llama 3.3 70B:** 7.0M GPU-hours H100
+- **OLMo 3 32B:** $2.75M, 1.05M GPU-hours H100
 
-#### 2.1 Fundamentos de GPUs
-- Por qué GPUs y no CPUs
-- Tipos de GPUs (consumer vs datacenter)
-- VRAM como cuello de botella
+#### Modelos Eficientes (No es la verdad absoluta):
+- **DeepSeek-V3 (671B MoE):** $5.5M, 2.788M GPU-hours (11× más eficiente que Llama)
+- **Mixtral 8x7B:** MoE, eficiencia de 12.9B con 45B params
 
-#### 2.2 Calculando Recursos Necesarios
-- Fórmula fundamental: `Memoria (GB) = (Parámetros × Bytes) / 10^9 × 1.2`
-- Ejemplos con Llama 3.1 8B y 70B
-- Calculadora interactiva: https://vram.asmirnov.xyz
-- Componentes de memoria (weights, KV cache, activations, overhead)
+#### Modelos Pequeños (Más accesibles):
+- **Qwen 2.5 1.5B:** Pre-entrenado en 18T tokens
+- **Falcon3 7B:** 14T tokens, 1,024 H100
 
-#### 2.3 Training vs Inference
+**Todas las referencias están en referencias_entrenamiento.bib con links a fuentes**
+
+### 2. Training ≠ Inference (5 min)
+**ANTES de hablar de hardware**
+
+- Distinción crucial: Forward vs Forward+Backward+Optimization
 - Training requiere 3-4× más memoria
-- Componentes: pesos, gradientes, optimizer states, activations
-- Batch size y su impacto
-- Visualización con memory profiler
+- Componentes: Weights, Gradients, Optimizer States, Activations
+- KV Cache (inference) vs Activations (training)
 
-#### 2.4 Referencias de Entrenamiento Real
-- GPT-3: ~$4.6M, 355 GPU-years
-- Llama 2 70B: ~1.7M GPU-hours
-- Mensaje: Pre-training inaccesible, fine-tuning muy accesible
+### 3. Hardware (20 min)
 
-### 3. Técnicas de Optimización (35-40 min)
+#### GPUs y VRAM:
+- VRAM = cuello de botella
+- Fórmula de cálculo: `Memoria = (Params × Bytes) / 10^9 × 1.2`
+- Calculadora interactiva: https://vram.asmirnov.xyz
 
-#### 3.1 Quantization (12-15 min)
-- Concepto y niveles (FP32 → FP16 → INT8 → INT4)
-- Post-Training Quantization (GPTQ, AWQ, SmoothQuant)
-- Quantization-Aware Training
-- Ejemplo práctico: Llama 8B en diferentes precisiones
-- INT8 = "sweet spot"
+#### Visualizaciones:
+- Memory profiler durante training (diapo5.png → memory_profiler_training.png)
+- Escalamiento con batch size (diapo6.png → memory_scaling_batch.png)
 
-#### 3.2 LoRA (12-15 min)
-- Low-Rank Adaptation: aproximar matrices grandes con pequeñas
+#### Comunicación:
+- Tensor Parallelism brevemente
+- Inter-GPU e intra-GPU
+- "Es un culo" (costosa)
+
+### 4. Software y Librerías (5 min)
+**Solo mencionar, no profundizar**
+
+- PyTorch, Accelerate, DeepSpeed, NeMo, SageMaker
+- Trade-offs: control vs facilidad
+- Nos aprovechamos de estas librerías
+
+### 5. Ciclo de Entrenamiento Común (10 min)
+**Usar imagen del paper OLMo del flujo**
+
+#### Tres Fases:
+1. **Base Pre-training:** 6-15T tokens, millones $, inaccesible
+2. **Instruction Tuning (SFT):** Miles ejemplos, accesible
+3. **Preference Alignment (DPO/RLHF):** Comparaciones, accesible
+
+#### Tabla comparativa:
+- Datos necesarios
+- GPU hours
+- Costo
+- Accesibilidad
+
+**Mensaje:** Pre-training = solo grandes labs, Fine-tuning = muy accesible
+
+### 6. Técnicas de Optimización (30 min)
+**La sección más importante**
+
+#### LoRA (Low-Rank Adaptation):
+- Reduce parámetros entrenables 100×
 - Matemática: W = W_original + B × A
-- Reducción 128× en parámetros entrenables
-- Beneficios y limitaciones
-- Cuándo usar LoRA
+- Ejemplo: 4096×4096 → 16×8192 = 128× reducción
+- Imagen: GenIA/lora.png
 
-#### 3.3 QLoRA (8-10 min)
-- Combinación de INT4 quantization + LoRA
-- Innovaciones: NF4, double quantization, paged optimizers
+#### Quantization:
+- FP32 → FP16 → INT8 → INT4
+- INT8 = sweet spot
+- Ejemplo: Llama 8B (19.2GB → 9.6GB → 4.8GB)
+- Imagen: GenIA/quantization.png
+
+#### QLoRA:
+- Combinación perfecta: INT4 + LoRA
 - Fine-tune Llama 70B en 48GB GPU
-- Democratización del fine-tuning
+- Democratización: $10k+ → $100-200
+- Imagen: GenIA/qlora.jpg
+- Innovaciones: NF4, double quantization, paged optimizers
 
-#### 3.4 Otras Técnicas (3-5 min)
-- Pruning: estructurado vs no estructurado
-- Tabla comparativa de todas las técnicas
+### 7. Evaluaciones (5 min)
+**Breve, no profundizar**
 
-### 4. Deployment en Producción (15-20 min)
+- MMLU, MT-Bench, HumanEval
+- Leaderboards: Hugging Face, Chatbot Arena
+- Placeholder para screenshot de leaderboard (usuario lo proporcionará)
+- Mensaje: Usar benchmarks como referencia, evaluar en tu caso de uso
 
-#### 4.1 El Problema del Deployment
-- Desafíos: concurrencia, memoria, batching, observabilidad
-- Métricas críticas: TTFT, throughput, requests concurrentes, costo/token
+### 8. Deployment y Recursos (10 min)
 
-#### 4.2 Bibliotecas de Serving
-- **vLLM:** Líder en throughput, PagedAttention, 24× mejor que HF Transformers
-- **TGI:** Integración HuggingFace, telemetría robusta
-- **TensorRT-LLM:** Máximo rendimiento NVIDIA, ultra-baja latencia
-- **Ollama:** Desarrollo local, muy simple
+#### vLLM:
+- Estándar de facto
+- PagedAttention, Continuous Batching
+- 24× mejor throughput
 
-#### 4.3 Conceptos Clave
-- Continuous Batching: reducción 5-10× en latencia
-- PagedAttention: 2-4× más requests concurrentes
-- Tensor Parallelism: dividir modelos entre GPUs
+#### Otras herramientas:
+- TGI, TensorRT-LLM, Ollama
+- Hugging Face Hub, Axolotl, Unsloth
 
-### 5. Recapitulación (5 min)
-- Flujo completo: Hardware → Optimización → Deployment
+### 9. Cierre (5 min)
+- Resumen de todo
 - Mensajes clave
-- Lo que hicimos posible (democratización)
-- Recursos útiles
+- Lo que NO hablamos
+- Próximo: Lab Práctico
+
+## Datos Reales y Referencias
+
+### Archivo referencias_entrenamiento.bib
+Contiene TODOS los datos con fuentes verificadas:
+
+**Modelos con costos documentados:**
+- GPT-3: $1.1M - $4.6M \[gpt3_cost_epoch, gpt3_cost_lambda\]
+- Llama 3.3: 7M GPU-hours \[llama33_training\]
+- OLMo 3: $2.75M, 1.05M GPU-hours \[olmo3_cost\]
+- DeepSeek-V3: $5.5M, 2.788M GPU-hours \[deepseek_v3_technical\]
+
+**Modelos sin costos públicos:**
+- Mixtral 8x7B: Arquitectura documentada, costo no público
+- Qwen 2.5 1.5B: Dataset (18T tokens) documentado, costo no público
+- Falcon3 7B: 14T tokens, 1,024 H100, costo no público
+
+**TODOS los links están en el .bib - NO hay valores inventados**
 
 ## Imágenes Necesarias
 
-### Ya deberían existir en `images/GenIA/`:
-- alpaca.png
-- Vram_estimator.png
-- lora.png
-- quantization.png
-- qlora.jpg
+### Ya deberían existir en images/GenIA/:
+- lora.png (arquitectura LoRA)
+- quantization.png (visualización niveles)
+- qlora.jpg (arquitectura QLoRA)
+- Vram_estimator.png (screenshot calculadora)
 
-### Debes copiar desde drafts_and_context/:
-1. diapo1.png → GenIA/training_3_steps.png
-2. diapo5.png → GenIA/memory_profiler_training.png
-3. diapo6.png → GenIA/memory_scaling_batch.png
+### Debes copiar/crear:
+1. **diapo1.png → GenIA/training_3_steps.png**
+   - Diagrama Forward/Backward/Optimization
+   - Usado en: 02_training_vs_inference.tex
 
-Ver `drafts_and_context/NOTA_IMAGENES.md` para comandos de copia.
+2. **diapo5.png → GenIA/memory_profiler_training.png**
+   - Memory profiler PyTorch de Llama 1B
+   - Usado en: 03_hardware.tex
+
+3. **diapo6.png → GenIA/memory_scaling_batch.png**
+   - Escalamiento memoria con batch size
+   - Usado en: 03_hardware.tex
+
+### Usuario proporcionará:
+4. **Imagen del ciclo OLMo** (base → instruction → preference)
+   - Placeholder en: 05_ciclo_entrenamiento.tex
+   - Guardar como: GenIA/olmo_training_cycle.png
+
+5. **Screenshot de leaderboard**
+   - Placeholder en: 07_evaluaciones.tex
+   - Guardar como: GenIA/llm_leaderboard.png
+
+### Imágenes con logos (opcionales):
+- Logos de OpenAI, Meta, AI2 para tabla comparativa
+- Logos de Alibaba, TII para modelos pequeños
 
 ## Cómo Compilar
-
-Desde el directorio raíz del proyecto:
 
 ```bash
 cd "/Users/clemente/Documents/Work/Latex Presentaciones/template_classes"
 pdflatex main.tex
+bibtex main  # Para incluir referencias
+pdflatex main.tex
+pdflatex main.tex
 ```
 
-O si usas latexmk:
-
+O con latexmk:
 ```bash
 latexmk -pdf main.tex
 ```
 
-## Recursos Mencionados en la Clase
+## Diferencias con la Versión Anterior
 
-- VRAM Calculator: https://vram.asmirnov.xyz
-- vLLM: https://github.com/vllm-project/vllm
-- Hugging Face TGI: https://github.com/huggingface/text-generation-inference
-- Ollama: https://ollama.ai
+### Nuevo enfoque (basado en mi_plan.md):
+✅ **Más visual:** Empieza con tabla comparativa de costos reales
+✅ **Mejor flujo:** Training ≠ Inference ANTES de hardware
+✅ **Más completo:** Incluye ciclo completo (base → instruction → preference)
+✅ **Más práctico:** Enfoque en "qué queremos hacer"
+✅ **Incluye evaluaciones:** MMLU, MT-Bench, leaderboards
+✅ **Datos reales:** Todas las referencias verificadas y documentadas
 
-## Papers de Referencia
-
-Las referencias bibliográficas están en el archivo de bibliografía del proyecto:
-- LoRA (Hu et al., 2021)
-- QLoRA (Dettmers et al., 2023)
-- DPO (Rafailov et al., 2024)
-- Constitutional AI (Anthropic)
-
-## Notas Pedagógicas
-
-- **Enfoque:** Bottom-up (problema → solución → matemática → ejemplo)
-- **Ejemplos consistentes:** Usar Llama 3.1 8B/70B como caso recurrente
-- **Trade-offs:** Siempre mostrar costos y beneficios
-- **Democratización:** Enfatizar lo que ES POSIBLE con hardware limitado
+### Qué se mantuvo:
+- Técnicas de optimización (LoRA, Quantization, QLoRA) - bien explicadas
+- Deployment con vLLM - sigue siendo relevante
+- Imágenes de arquitecturas (lora.png, qlora.jpg, quantization.png)
 
 ## Próximos Pasos
 
-- [ ] Copiar las 3 imágenes faltantes (ver NOTA_IMAGENES.md)
-- [ ] Verificar que todas las imágenes del .tex original estén disponibles
-- [ ] Compilar y revisar el PDF
-- [ ] Ajustar timings según necesidad
-- [ ] Preparar la sesión práctica (1.5 horas de práctica separada)
+- [ ] Copiar las 3 imágenes de diapos (ver arriba)
+- [ ] Buscar y agregar imagen del ciclo OLMo
+- [ ] Buscar y agregar screenshot de leaderboard
+- [ ] Opcional: Agregar logos de compañías
+- [ ] Compilar y verificar que todas las referencias funcionen
+- [ ] Revisar timing (debería ser ~90 min)
+- [ ] Preparar lab práctico (fine-tuning con QLoRA)
+
+## Notas Pedagógicas
+
+- **Enfoque:** Ejemplos concretos primero, luego teoría
+- **Progresión:** Grande → eficiente → pequeño (para modelos)
+- **Mensaje central:** Fine-tuning es ACCESIBLE con técnicas modernas
+- **Trade-offs:** Siempre mostrar costos y beneficios
+- **Prohibido:** Inventar datos - todas las cifras están referenciadas
+
+## Referencias en el .bib
+
+El archivo `referencias_entrenamiento.bib` contiene 17 referencias con:
+- Costos de entrenamiento documentados
+- GPU hours de modelos específicos
+- Links a fuentes originales (papers, blogs oficiales, technical reports)
+- Notas con datos específicos extraídos
+
+**Formato de cita en slides:** `\cite{clave_referencia}`

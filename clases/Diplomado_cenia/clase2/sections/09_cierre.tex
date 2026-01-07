@@ -1,0 +1,114 @@
+% ============================================================================
+% SECCIÓN 9: CIERRE Y RESUMEN
+%============================================================================
+
+\section{Cierre}
+\begin{frame}
+  \frametitle{Mensajes Clave para Llevar}
+  
+  Son muchos los factores que influyen en el entrenamiento de LLMs, pero en corto siempre tenemos que tener en consideración el tamaño del modelo, nuestros recursos computacionales y el volumen de datos.
+  \begin{alertblock}{1. Pre-training vs Fine-tuning}
+    \begin{itemize}
+      \item Pre-training: Solo para grandes labs (millones \$)
+      \item Fine-tuning: \alert{Muy accesible} con técnicas modernas
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \begin{alertblock}{2. Optimización democratiza el acceso}
+    \begin{itemize}
+      \item QLoRA: Fine-tune Llama 70B pasó de \$10k+ a \$100-200
+      \item INT8 quantization: Balance perfecto calidad/eficiencia
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \begin{alertblock}{3. Enfoque práctico}
+    \begin{enumerate}
+      \item Partir de modelo base open-source
+      \item Fine-tunear para tu dominio con QLoRA
+      \item Evaluar en benchmarks + tu caso de uso
+      \item Deployar con vLLM
+    \end{enumerate}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Lo Que NO Hablamos}
+
+  \textbf{Por limitaciones de tiempo, no cubrimos:}
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item \textbf{Evaluación en profundidad}: Cómo diseñar evaluaciones para tu dominio
+    \item \textbf{Paralelismo avanzado}: Data parallelism, pipeline parallelism, ZeRO optimization
+    \item \textbf{Seguridad y alineamiento}: Red-teaming, Constitutional AI, safety fine-tuning
+    \item \textbf{Gestión de datos}: Curación de datasets, deduplicación, filtrado
+    \item \textbf{Monitoring en producción}: Métricas, logging, debugging
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Estos son temas avanzados}
+    Si te interesan, hay recursos en las referencias \cite{deepseek_v3_technical,olmo3_blog,llama33_training}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Próximo Paso: Lab Práctico}
+
+  \textbf{En la sesión práctica (1.5 horas):}
+
+  \vspace{0.3cm}
+
+  \begin{enumerate}
+    \item \textbf{Fine-tunearemos un LLM} usando QLoRA
+    \item Usaremos un modelo pequeño (Qwen 1.5B o similar)
+    \item Herramientas: Hugging Face, Axolotl o Unsloth
+    \item Dataset: Instruction tuning en un dominio específico
+    \item Evaluaremos el resultado
+  \end{enumerate}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Objetivo del lab}
+    Que tengas \alert{experiencia práctica} de todo el pipeline:
+    \begin{itemize}
+      \item Preparar datos
+      \item Configurar LoRA/QLoRA
+      \item Entrenar (fine-tune)
+      \item Evaluar
+      \item Usar el modelo
+    \end{itemize}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \Huge ¡Gracias!
+
+    \vspace{1cm}
+
+    \Large ¿Dudas?
+
+    \vspace{1.5cm}
+
+    \normalsize
+    \textbf{Siguiente:} Lab Práctico - Fine-tuning con QLoRA
+
+    \vspace{0.5cm}
+
+    \small
+    Referencias y recursos en las siguientes slides
+  \end{center}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Referencias}
+  \tiny
+  \bibliographystyle{plain}
+  \bibliography{clases/Diplomado_cenia/clase2/referencias_entrenamiento}
+\end{frame}

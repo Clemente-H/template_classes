@@ -1,0 +1,387 @@
+% ============================================================================
+% SECCIÓN 6: TÉCNICAS DE OPTIMIZACIÓN
+% LoRA, Quantization, QLoRA - Haciendo el fine-tuning accesible
+%============================================================================
+
+\section{Técnicas de Optimización}
+
+\begin{frame}
+  \frametitle{Haciendo el Fine-tuning Aún Más Accesible}
+
+  Ya vimos que fine-tuning es mucho más barato que pre-training...
+
+  \vspace{0.3cm}
+
+  \textbf{Pero aún así:}
+  \begin{itemize}
+    \item Fine-tunear Llama 70B en FP32 requiere ~800+ GB
+    \item Necesitarías 10-12× A100 80GB
+    \item Costo: Miles de dólares en cloud
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{¿Podemos hacerlo mejor?}
+    Sí. Con \alert{técnicas de optimización} que reducen dramáticamente los recursos necesarios sin sacrificar (mucha) calidad
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{Veremos tres técnicas clave:}
+  \begin{enumerate}
+    \item LoRA (Low-Rank Adaptation)
+    \item Quantization
+    \item QLoRA (combinación de ambas)
+  \end{enumerate}
+\end{frame}
+
+\subsection{LoRA: Low-Rank Adaptation}
+
+\begin{frame}[fragile]
+  \frametitle{LoRA: La Idea Central}
+
+  \begin{block}{Observación clave}
+    No necesitamos actualizar TODOS los parámetros durante fine-tuning. Las matrices de pesos tienen \textbf{estructura redundante}.
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{Descomposición de rango bajo:}
+  \[
+  W = W_{\text{original}} + \Delta W \quad \text{donde} \quad \Delta W = B \times A
+  \]
+
+  \vspace{0.2cm}
+
+  Donde:
+  \begin{itemize}
+    \item $W$: matriz original de dimensión $d \times k$
+    \item $B$: matriz de rango bajo $r$, dimensión $d \times r$
+    \item $A$: matriz de rango bajo $r$, dimensión $r \times k$
+    \item $r \ll \min(d,k)$ (típicamente $r=8, 16, 32$)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Truco:} Solo entrenamos $B$ y $A$, manteniendo $W$ frozen
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{LoRA: Visualización}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/lora.png}
+    \caption{Arquitectura LoRA: matriz grande $W$ frozen vs matrices pequeñas $B$ y $A$ entrenables}
+  \end{figure}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Beneficio}
+    En lugar de entrenar $d \times k$ parámetros, solo entrenamos $r(d+k)$ parámetros
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{LoRA: Matemática de la Eficiencia}
+
+  \textbf{Ejemplo concreto} para $d=k=4096$, $r=16$:
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item \textbf{Parámetros originales:} $4096 \times 4096 = 16{,}777{,}216$
+    \item \textbf{Parámetros LoRA:} $16 \times (4096+4096) = 131{,}072$
+    \item \textbf{Reducción:} \alert{128× menos parámetros!}
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Beneficios prácticos}
+    \begin{itemize}
+      \item Solo entrenas $\sim$0.1-1\% de los parámetros
+      \item Memoria de entrenamiento: reducción de 10-100×
+      \item Velocidad de entrenamiento: 2-3× más rápido
+      \item Múltiples adaptadores: varios LoRA para diferentes tareas
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \small
+  Fuente: \cite{hu2021loralowrankadaptationlarge}
+\end{frame}
+
+\begin{frame}
+  \frametitle{LoRA: Cuándo Usar}
+
+  \textbf{Limitaciones:}
+  \begin{itemize}
+    \item Menor expresividad que full fine-tuning
+    \item Mejor para adaptation que para aprender conocimiento nuevo
+    \item Requiere tuning del hiperparámetro $r$ (rank)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Cuándo usar LoRA:}
+  \begin{itemize}
+    \item Fine-tuning con recursos limitados (1 GPU vs cluster)
+    \item Necesitas múltiples adaptadores para diferentes tareas
+    \item El modelo base ya es bueno, solo necesitas ajustes
+    \item Quieres iterar rápidamente con diferentes datasets
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Caso de uso típico}
+    Adaptar Llama 3.1 70B para tu dominio específico (legal, médico, código) sin necesitar un cluster de GPUs
+  \end{alertblock}
+\end{frame}
+
+\subsection{Quantization}
+
+\begin{frame}[fragile]
+  \frametitle{Quantization: Reducir Precisión Inteligentemente}
+
+  \begin{block}{Concepto}
+    Representar los pesos del modelo con \alert{menos bits}, reduciendo memoria y acelerando operaciones
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|c|}
+  \hline
+  \textbf{Formato} & \textbf{Bits} & \textbf{Reducción} & \textbf{Pérdida calidad} \\ \hline
+  FP32 & 32 & 1× & Baseline \\ \hline
+  FP16 & 16 & 2× & <1\% \\ \hline
+  INT8 & 8 & 4× & 1-3\% \\ \hline
+  INT4 & 4 & 8× & 3-8\% \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/quantization.png}
+    \caption{Representación visual de diferentes niveles de quantization}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Quantization: Técnicas Principales}
+
+  \textbf{1. Post-Training Quantization (PTQ):}
+  \begin{itemize}
+    \item Cuantiza un modelo ya entrenado \textbf{sin reentrenamiento}
+    \item Rápido y simple
+    \item \textbf{GPTQ:} Optimal Brain Quantization, minimiza error layer-by-layer
+    \item \textbf{AWQ:} Activation-aware, protege pesos importantes
+    \item \textbf{SmoothQuant:} Suaviza outliers para INT8 estable
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Quantization-Aware Training (QAT):}
+  \begin{itemize}
+    \item Incorpora quantization durante el entrenamiento
+    \item Modelo aprende representaciones robustas a cuantización
+    \item Mejor calidad final pero más costoso
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Para fine-tuning: usa PTQ}
+    Es rápido, no requiere reentrenamiento, y la pérdida de calidad es mínima
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Quantization: Ejemplo Práctico con Llama 8B}
+
+  \begin{columns}
+  \column{0.48\textwidth}
+  \textbf{Sin Quantization (FP16):}
+  \begin{itemize}
+    \item Memoria: 19.2 GB
+    \item Hardware: RTX 4090
+    \item Velocidad: baseline
+    \item Calidad: 100\%
+  \end{itemize}
+
+  \vspace*{.3cm}
+  \textbf{INT8 Quantization:}
+  \begin{itemize}
+    \item Memoria: \alert{9.6 GB}
+    \item Hardware: RTX 3080
+    \item Velocidad: 1.5-2× más rápido
+    \item Calidad: $\sim$98-99\%
+  \end{itemize}
+
+  \column{0.48\textwidth}
+  \textbf{INT4 Quantization:}
+  \begin{itemize}
+    \item Memoria: \alert{4.8 GB}
+    \item Hardware: RTX 3060
+    \item Velocidad: 2-3× más rápido
+    \item Calidad: $\sim$92-95\%
+  \end{itemize}
+
+  \vspace*{.3cm}
+  \begin{alertblock}{Sweet spot}
+  \alert{INT8} es el balance perfecto entre calidad y eficiencia para la mayoría de casos
+  \end{alertblock}
+
+  \end{columns}
+\end{frame}
+
+\subsection{QLoRA: La Combinación Perfecta}
+
+\begin{frame}[fragile]
+  \frametitle{QLoRA: Lo Mejor de Dos Mundos}
+
+  \begin{block}{La idea}
+    \begin{itemize}
+      \item \textbf{Quantization (INT4)} para base model $\rightarrow$ reduce memoria 4×
+      \item \textbf{LoRA} para fine-tuning $\rightarrow$ solo entrenas $\sim$0.1\% params
+      \item \textbf{Resultado:} Fine-tune 70B en una GPU de 48GB
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/qlora.png}
+    \caption{Arquitectura QLoRA: modelo base cuantizado (frozen) + adaptadores LoRA entrenables}
+  \end{figure}
+
+  \vspace{0.2cm}
+
+  \small
+  Fuente: \cite{dettmers2023qloraefficientfinetuningquantized}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{QLoRA: Innovaciones Técnicas}
+
+  \textbf{1. 4-bit NormalFloat (NF4):}
+  \begin{itemize}
+    \item Distribución especial de quantization bins
+    \item Optimal para pesos de neural networks (distribución normal)
+    \item Mejor que INT4 uniforme
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{2. Double Quantization:}
+  \begin{itemize}
+    \item Quantiza los \textit{quantization constants} también
+    \item Ahorra $\sim$0.4 bits por parámetro adicional
+  \end{itemize}
+
+  \vspace{0.2cm}
+
+  \textbf{3. Paged Optimizers:}
+  \begin{itemize}
+    \item Usa CPU RAM como backup para optimizer states
+    \item Evita OOM (Out-Of-Memory) errors
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Estas innovaciones hacen que QLoRA sea casi tan bueno como full fine-tuning}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{QLoRA: Resultados Empíricos}
+
+  \textbf{Resultados del paper original \cite{dettmers2023qloraefficientfinetuningquantized}:}
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item QLoRA 65B $\approx$ Full fine-tuning 65B en benchmarks
+    \item Llama 65B fine-tuned en $\sim$48GB VRAM (vs $\sim$800GB para full FT)
+    \item Guanaco (Llama+QLoRA) competitive con ChatGPT 3.5
+    \item Quality loss: $<$2\% en MMLU, HumanEval
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Democratización}
+    \textbf{Antes de QLoRA (2023):}
+    \begin{itemize}
+      \item Fine-tune Llama 70B: Cluster de 10+ GPUs datacenter, \$10k+
+    \end{itemize}
+
+    \textbf{Con QLoRA:}
+    \begin{itemize}
+      \item Fine-tune Llama 70B: 1× GPU 48GB (RTX 6000 Ada, A100), \$100-200 en cloud
+      \item \alert{Accesible para estudiantes, startups, investigadores}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tabla Comparativa de Técnicas}
+
+  \begin{table}[h!]
+  \centering
+  \tiny
+  \begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \textbf{Técnica} & \textbf{Ahorro Memoria} & \textbf{Speedup} & \textbf{Pérdida Calidad} & \textbf{Dificultad} \\ \hline
+  \textbf{LoRA} & 10-100× (training) & $\sim$1× & Mínima & Media \\ \hline
+  \textbf{INT8 Quant} & 2× & 1.5-2× & 1-3\% & Baja \\ \hline
+  \textbf{INT4 Quant} & 4× & 2-3× & 3-8\% & Media \\ \hline
+  \textbf{QLoRA} & 4× (training) & 0.8× (lento) & $\sim$2\% & Media \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \textbf{Combinaciones efectivas:}
+  \begin{itemize}
+    \item \textbf{Solo inferencia:} INT8 quantization
+    \item \textbf{Fine-tuning modelo mediano (8B-13B):} LoRA
+    \item \textbf{Fine-tuning modelo grande (70B+):} QLoRA
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Decision framework}
+    \begin{enumerate}
+      \item ¿Solo inferencia? $\rightarrow$ Quantization (INT8 o INT4)
+      \item ¿Fine-tune con 1 GPU? $\rightarrow$ LoRA (modelos pequeños) o QLoRA (modelos grandes)
+      \item ¿Cluster disponible? $\rightarrow$ Full fine-tuning o LoRA
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Resumen: Técnicas de Optimización}
+
+  \begin{enumerate}
+    \item \textbf{LoRA:} Reduce parámetros entrenables 100×, mantiene calidad
+    \item \textbf{Quantization:} Reduce precisión, INT8 = sweet spot
+    \item \textbf{QLoRA:} Combina ambas, democratiza fine-tuning de modelos grandes
+  \end{enumerate}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Mensaje clave}
+    Con estas técnicas, fine-tunear un modelo de 70B pasó de \alert{inaccesible} (\$10k+) a \alert{muy accesible} (\$100-200)
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Siguiente sección}
+    Veremos \alert{evaluaciones} para medir qué tan bien funcionó nuestro fine-tuning
+  \end{block}
+\end{frame}

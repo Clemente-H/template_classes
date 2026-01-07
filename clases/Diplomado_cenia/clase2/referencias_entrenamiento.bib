@@ -1,0 +1,130 @@
+% Referencias de costos de entrenamiento de LLMs
+
+@misc{gpt3_cost_lambda,
+  title = {What is the cost of training large language models?},
+  author = {Cudo Compute},
+  howpublished = {\url{https://www.cudocompute.com/blog/what-is-the-cost-of-training-large-language-models}},
+  note = {Estimación Lambda Labs: GPT-3 175B costó ~\$4.6M, 355 GPU-years en V100, 3.114E23 FLOPS},
+  year = {2020}
+}
+
+@misc{gpt3_cost_epoch,
+  title = {Trends in the dollar training cost of machine learning systems},
+  author = {Epoch AI},
+  howpublished = {\url{https://epoch.ai/blog/trends-in-the-dollar-training-cost-of-machine-learning-systems}},
+  note = {GPT-3 costó aproximadamente \$1.1M en mayo 2020},
+  year = {2020}
+}
+
+@misc{gpt3_energy_cost,
+  title = {The Cost of AI: Billions Spent on Training \& Infrastructure},
+  author = {Forward Future},
+  howpublished = {\url{https://www.forwardfuture.ai/p/the-cost-of-ai-breakdown-of-investments-in-training-infrastructure-and-more}},
+  note = {GPT-3 consumió 1,287 MWh durante entrenamiento, ~\$167,310 en costos energéticos},
+  year = {2020}
+}
+
+@misc{llama33_training,
+  title = {Meta releases efficiency-optimized Llama 3.3 70B large language model},
+  author = {SiliconANGLE},
+  howpublished = {\url{https://siliconangle.com/2024/12/06/meta-releases-efficiency-optimized-llama-3-3-70b-large-language-model/}},
+  note = {Llama 3.3: 39.3M GPU hours total en H100, 7.0M GPU hours para el modelo 70B},
+  year = {2024}
+}
+
+@misc{llama33_emissions,
+  title = {meta-llama/Llama-3.3-70B-Instruct},
+  author = {Meta},
+  howpublished = {\url{https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct}},
+  note = {Emisiones: 11,390 tons CO2eq total, 2,040 tons para 70B},
+  year = {2024}
+}
+
+@misc{olmo3_cost,
+  title = {Minipost: Olmo 3 training cost},
+  author = {Muxup},
+  howpublished = {\url{https://muxup.com/2025q4/minipost-olmo3-training-cost}},
+  note = {OLMo 3 7B: ~234k H100 hours, 32B: ~1.05M H100 hours, costo 32B Think: ~\$2.75M en 56 días con 1,024 H100},
+  year = {2025}
+}
+
+@misc{olmo3_blog,
+  title = {Olmo 3: Charting a path through the model flow to lead open-source AI},
+  author = {Allen Institute for AI},
+  howpublished = {\url{https://allenai.org/blog/olmo3}},
+  note = {Entrenado en ~6T tokens},
+  year = {2025}
+}
+
+@article{deepseek_v3_technical,
+  title = {DeepSeek-V3 Technical Report},
+  author = {DeepSeek AI},
+  journal = {arXiv preprint arXiv:2412.19437},
+  howpublished = {\url{https://arxiv.org/abs/2412.19437}},
+  note = {671B parámetros totales, 37B activos, 14.8T tokens, 2.788M H800 GPU hours, costo estimado \$5.576M},
+  year = {2024}
+}
+
+@misc{deepseek_v3_cost,
+  title = {DeepSeek V3 and the cost of frontier AI models},
+  author = {Interconnects AI},
+  howpublished = {\url{https://www.interconnects.ai/p/deepseek-v3-and-the-actual-cost-of}},
+  note = {Comparación: Llama 3.1 405B usó 30.84M GPU hours vs DeepSeek-V3 2.788M (11x menos)},
+  year = {2024}
+}
+
+@misc{mixtral_blog,
+  title = {Mixtral of experts},
+  author = {Mistral AI},
+  howpublished = {\url{https://mistral.ai/news/mixtral-of-experts}},
+  note = {Mixtral 8x7B: MoE con 8 expertos, 45B parámetros totales, opera con eficiencia de 12.9B},
+  year = {2023}
+}
+
+@misc{mixtral_huggingface,
+  title = {Welcome Mixtral - a SOTA Mixture of Experts on Hugging Face},
+  author = {Hugging Face},
+  howpublished = {\url{https://huggingface.co/blog/mixtral}},
+  note = {Información general sobre arquitectura MoE},
+  year = {2023}
+}
+
+@misc{qwen25_github,
+  title = {Qwen3: Large language model series developed by Qwen team, Alibaba Cloud},
+  author = {Alibaba Cloud},
+  howpublished = {\url{https://github.com/QwenLM/Qwen3}},
+  note = {Qwen2.5: pre-entrenado en hasta 18T tokens, modelos de 0.5B a 72B parámetros},
+  year = {2024}
+}
+
+@misc{qwen3_next,
+  title = {Qwen3-Next: A New Generation of Ultra-Efficient Model Architecture Unveiled},
+  author = {Alibaba Cloud Community},
+  howpublished = {\url{https://www.alibabacloud.com/blog/602536}},
+  note = {Qwen3-Next-80B usa menos del 10\% del costo de entrenamiento (GPU hours) de Qwen3-32B},
+  year = {2024}
+}
+
+@misc{falcon3_huggingface,
+  title = {Welcome to the Falcon 3 Family of Open Models!},
+  author = {Hugging Face},
+  howpublished = {\url{https://huggingface.co/blog/falcon3}},
+  note = {Falcon3-7B: pre-entrenado en 14T tokens usando 1,024 H100},
+  year = {2024}
+}
+
+@misc{falcon3_tii,
+  title = {tiiuae/Falcon3-7B-Base},
+  author = {Technology Innovation Institute},
+  howpublished = {\url{https://huggingface.co/tiiuae/Falcon3-7B-Base}},
+  note = {14T tokens, más del doble que Falcon 2 (5.5T tokens)},
+  year = {2024}
+}
+
+@misc{falcon180b,
+  title = {Spread Your Wings: Falcon 180B is here},
+  author = {Hugging Face},
+  howpublished = {\url{https://huggingface.co/blog/falcon-180b}},
+  note = {Falcon 180B: 3.5T tokens, ~7M GPU hours, hasta 4,096 GPUs simultáneas},
+  year = {2023}
+}

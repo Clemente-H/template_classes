@@ -1,0 +1,234 @@
+% ============================================================================
+% SECCIÓN 3: HARDWARE
+% GPUs, memoria, tensor parallelism, calculadora
+%============================================================================
+
+\section{Hardware para LLMs}
+
+\begin{frame}
+  \frametitle{GPUs: El Motor del Entrenamiento}
+
+  \begin{columns}[T]
+    \begin{column}{.48\textwidth}
+      \textbf{¿Por qué GPUs?}
+      \begin{itemize}
+        \item Operaciones matriciales masivas
+        \item Miles de cores paralelos
+        \item Optimizadas para throughput
+        \item Tensor Cores especializados
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{.48\textwidth}
+      \textbf{El cuello de botella:}
+      \begin{itemize}
+        \item \alert{VRAM} (memoria de la GPU)
+        \item Determina tamaño del modelo
+        \item Determina batch size
+        \item Más crítico que velocidad
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Tipos de GPUs Comunes}
+    \textbf{Consumer:}
+    \begin{itemize}
+      \item RTX 3060/4060: 12-16 GB VRAM (~\$300-400)
+      \item RTX 4090: 24 GB VRAM (~\$1,600)
+    \end{itemize}
+
+    \textbf{Datacenter:}
+    \begin{itemize}
+      \item A100: 40/80 GB VRAM (~\$2-4/hora en cloud)
+      \item H100: 80 GB VRAM (~\$4-8/hora en cloud)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Calculando Memoria Necesaria: Inferencia}
+
+  \textbf{Fórmula fundamental para inferencia:}
+
+  \begin{block}{Fórmula básica}
+  \[
+  \text{Memoria (GB)} = \frac{\text{Parámetros} \times \text{Bytes}_{\text{precisión}}}{10^9} \times 1.2
+  \]
+  Factor 1.2 = overhead (activations, KV cache, buffers)
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|}
+  \hline
+  \textbf{Precisión} & \textbf{Bits} & \textbf{Bytes/param} \\ \hline
+  FP32 & 32 & 4 \\ \hline
+  FP16 / BF16 & 16 & 2 \\ \hline
+  INT8 & 8 & 1 \\ \hline
+  INT4 & 4 & 0.5 \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \textbf{Ejemplo: Llama 3.1 8B en FP16}
+  \[
+  \text{Memoria} = \frac{8B \times 2}{10^9} \times 1.2 = \alert{19.2 GB}
+  \]
+  Hardware necesario: RTX 4090 (24GB), A10 (24GB)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Calculadora VRAM Interactiva}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/Vram_estimator.png}
+    \caption{VRAM Calculator: \url{https://vram.asmirnov.xyz}}
+  \end{figure}
+
+  \vspace{0.3cm}
+
+  \textbf{Parámetros que puedes ajustar:}
+  \begin{itemize}
+    \item Modelo (número de parámetros)
+    \item Precisión (FP32, FP16, INT8, INT4)
+    \item Batch size
+    \item Sequence length
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Memoria en Training: Mucho Más Compleja}
+  \begin{small}
+  Ya vimos que training requiere 3-4× más memoria. Veamos la composición:
+
+  \begin{enumerate}
+    \item \textbf{Model Weights} (baseline)
+    \item \textbf{Gradients} (+1× weights)
+    \item \textbf{Optimizer States} (+2× weights para Adam)
+    \item \textbf{Activations} (depende de batch size \& sequence length)
+  \end{enumerate}
+  % TODO: Usar diapo5.png como referencia
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.80\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/memory_profiler_training.png}
+    \caption{Memory profiler de PyTorch: Llama 1B durante primeros 4 pasos de training}
+  \end{figure}
+
+  \small
+  Observa los picos en FWD (forward), BWD (backward), y OPT (optimizer step)
+  \end{small}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Batch Size y su Impacto en Memoria}
+  \begin{small}
+  \textbf{El batch size es crucial:}
+
+  \begin{itemize}
+    \item \alert{Tamaño típico actual:} 4-60M tokens/batch
+    \item \textbf{Llama-1:} Batch de 4M tokens para 1.4T tokens totales
+    \item \textbf{DeepSeek:} Batch de 60M tokens para 14T tokens totales
+  \end{itemize}
+
+  % TODO: Usar diapo6.png como referencia
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/memory_scaling_batch.png}
+    \caption{Escalamiento de memoria con batch size para Meta-Llama 3.1 (8B, 70B, 405B)}
+  \end{figure}
+
+  \begin{alertblock}{Observación clave}
+    Uso de memoria \alert{NO es estático} - crece linealmente con batch size y cuadráticamente con sequence length
+  \end{alertblock}
+
+  \end{small}
+\end{frame}
+
+\begin{frame}
+ 
+  \frametitle{Comunicación Inter-GPU e Intra-GPU}
+  \begin{small}
+  Cuando un modelo no cabe en una sola GPU, necesitamos \textbf{paralelizar}:
+  \begin{block}{Tensor Parallelism (TP)}
+    \begin{itemize}
+      \item Divide el modelo entre GPUs
+      \item Cada GPU procesa una parte de cada operación
+      \item Requiere comunicación constante entre GPUs
+      \item \alert{Comunicación es el cuello de botella}
+    \end{itemize}
+  \end{block}
+
+  \textbf{Tipos de comunicación:}
+  \begin{itemize}
+    \item \textbf{Intra-GPU:} Dentro de la misma GPU (rápida)
+    \item \textbf{Inter-GPU:} Entre GPUs diferentes
+    \begin{itemize}
+      \item Mismo nodo: NVLink (~600 GB/s)
+      \item Diferentes nodos: InfiniBand (~200 GB/s)
+      \item Ethernet estándar: (~10-100 GB/s) \alert{muy lento}
+    \end{itemize}
+  \end{itemize}
+  \begin{alertblock}{Implicación}
+    La comunicación inter-GPU es muy dificil (costosa en latencia y overhead)
+  \end{alertblock}
+  \end{small}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ejemplo: Llama 3.1 70B en Training}
+
+  \textbf{Llama 3.1 70B en FP32 con Adam:}
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item \textbf{Weights:} 70B × 4 bytes = 280 GB
+    \item \textbf{Gradients:} 70B × 4 bytes = 280 GB
+    \item \textbf{Adam states:} 70B × 4 bytes × 2 = 560 GB
+    \item \textbf{Activations:} ~100-200 GB (depende de batch/seq)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Total:} \alert{~1,200-1,400 GB}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Opciones de hardware}
+    \begin{itemize}
+      \item 16-18× A100 80GB (¡carísimo!)
+      \item O usar técnicas de optimización (que veremos después)
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Mensaje}
+    Training de modelos grandes sin optimización = \alert{inaccesible para la mayoría}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Resumen: Hardware}
+
+  \begin{enumerate}
+    \item \textbf{VRAM es el cuello de botella} - determina qué puedes hacer
+    \item \textbf{Usa calculadoras} como \url{https://vram.asmirnov.xyz} para estimar
+    \item \textbf{Training requiere 3-4× más memoria} que inference
+    \item \textbf{Batch size y sequence length} impactan dramáticamente la memoria
+    \item \textbf{Paralelismo} es necesario para modelos grandes, pero la comunicación es costosa
+  \end{enumerate}
+
+  \vspace{0.5cm}
+
+  \begin{block}{¿Y el software?}
+    La comunicación inter-GPU es compleja. Por suerte, hay bibliotecas que nos ayudan...
+  \end{block}
+\end{frame}

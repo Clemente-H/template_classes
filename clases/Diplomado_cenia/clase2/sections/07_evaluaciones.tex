@@ -1,0 +1,136 @@
+% ============================================================================
+% SECCIÓN 7: EVALUACIONES
+% Breve mención de MT-Bench, MMLU, LLM Leaderboard - no profundizar
+%============================================================================
+
+\section{Evaluaciones}
+
+\begin{frame}
+  \frametitle{Aparte de Entrenar: ¿Qué Tan Bien Nos Fue?}
+
+  Una vez que fine-tuneaste tu modelo, necesitas \textbf{evaluar su calidad}:
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item ¿Mejoró en tu tarea específica?
+    \item ¿Mantuvo sus capacidades generales?
+    \item ¿Cómo se compara con otros modelos?
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Benchmarks populares}
+    Hay varios benchmarks estandarizados para evaluar LLMs
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Nota}
+    No profundizaremos mucho en evaluaciones hoy, pero es importante conocer las herramientas disponibles
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Benchmarks Comunes}
+
+  \textbf{1. MMLU (Massive Multitask Language Understanding):}
+  \begin{itemize}
+    \item 57 tareas de conocimiento (matemáticas, historia, ciencias, etc.)
+    \item Preguntas de opción múltiple
+    \item Mide conocimiento general
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{2. MT-Bench (Multi-Turn Bench):}
+  \begin{itemize}
+    \item Conversaciones multi-turno
+    \item Evaluado por GPT-4 como juez
+    \item Mide capacidad de seguir conversaciones
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{3. HumanEval:}
+  \begin{itemize}
+    \item Problemas de programación
+    \item Generación de código funcional
+    \item Mide capacidades de coding
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{LLM Leaderboards}
+
+  % TODO: Usuario mostrará ejemplo de leaderboard
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/leaderboard.png}
+    \caption{Ejemplo de LLM Leaderboard (Hugging Face)}
+  \end{figure}
+
+  \vspace{0.3cm}
+
+  \textbf{Leaderboards útiles:}
+  \begin{itemize}
+    \item Hugging Face Open LLM Leaderboard
+    \item Chatbot Arena (LMSYS)
+    \item AlpacaEval
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Evaluación: Más Allá de Benchmarks}
+
+  \textbf{Los benchmarks son útiles pero...}
+  \begin{small}
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Limitaciones}
+    \begin{itemize}
+      \item Pueden no reflejar tu caso de uso específico
+      \item Algunos modelos están "overfitted" a benchmarks
+      \item No miden aspectos como toxicidad, sesgos, alucinaciones
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{Evaluación en práctica:}
+  \begin{itemize}
+    \item \textbf{Human evaluation:} Usuarios reales evalúan outputs
+    \item \textbf{Task-specific metrics:} Define métricas para tu dominio
+    \item \textbf{A/B testing:} Compara modelo nuevo vs viejo en producción
+    \item \textbf{LLM-as-judge:} Usa modelos fuertes (GPT-4) para evaluar
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Recomendación}
+    Usa benchmarks como \alert{referencia inicial}, pero siempre evalúa en tu caso de uso real
+  \end{block}
+\end{small}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{No Profundizaremos Más en Evaluaciones}
+
+  \textbf{Solo queríamos que sepas que existen:}
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item MMLU, MT-Bench, HumanEval para evaluar capacidades
+    \item Leaderboards para comparar con otros modelos
+    \item Importancia de evaluar en tu dominio específico
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Siguiente sección}
+    Pasaremos a \alert{deployment y recursos útiles} para poner tus modelos en producción
+  \end{block}
+\end{frame}

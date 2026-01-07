@@ -1,0 +1,226 @@
+% ============================================================================
+% SECCIÓN 2: TRAINING ≠ INFERENCE
+% Distinción crucial antes de hablar de hardware
+%============================================================================
+
+\section{Entrenar vs Inferir}
+
+\begin{frame}
+  \frametitle{Entrenar | Inferir}
+
+  \begin{columns}[T]
+    \begin{column}{.48\textwidth}
+      \textbf{Inferencia}
+      \begin{itemize}
+        \item Modelo ya entrenado
+        \item Solo \alert{forward pass}
+        \item Generar outputs para usuarios
+        \item Latencia es crítica
+        \item Menos memoria requerida
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{.48\textwidth}
+      \textbf{Entrenamiento}
+      \begin{itemize}
+        \item Aprender de datos
+        \item \alert{Forward + backward pass}
+        \item Actualizar parámetros
+        \item Throughput es crítico
+        \item \alert{3-4× más memoria}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{¿Por qué esta distinción es importante?}
+    Los recursos que necesitas son \textbf{completamente diferentes}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Los 3 Pasos del Entrenamiento}
+
+  Al entrenar un modelo, hay tres pasos fundamentales que se repiten en cada batch:
+
+  \vspace{0.3cm}
+
+  \begin{enumerate}
+    \item \textbf{Forward Pass:} Los inputs pasan por el modelo para obtener outputs
+    \item \textbf{Backward Pass:} Se calculan los gradientes (derivadas de la loss)
+    \item \textbf{Optimization:} Se usan los gradientes para actualizar los parámetros
+  \end{enumerate}
+
+  \vspace{0.3cm}
+
+  % TODO: Usar diapo1.png como referencia
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{/Users/clemente/Documents/Work/Latex Presentaciones/template_classes/clases/Diplomado_cenia/clase2/images/forward_backward.png}
+    \caption{Diagrama de los 3 pasos del entrenamiento (Forward, Backward, Optimization)}
+  \end{figure}
+
+  \vspace{0.2cm}
+  \small
+  \textbf{Implicación:} Cada paso consume memoria de manera distinta
+\end{frame}
+
+\begin{frame}
+  \frametitle{¿Qué se Almacena en Memoria Durante Entrenamiento?}
+
+  Cuando entrenamos un LLM, almacenamos varios elementos en la GPU:
+
+  \vspace{0.3cm}
+
+  \begin{enumerate}
+    \item \textbf{Pesos del modelo} (Model Weights)
+    \begin{itemize}
+      \item Los parámetros del modelo
+      \item Tamaño: $N$ parámetros × bytes por parámetro
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \item \textbf{Gradientes del modelo} (Gradients)
+    \begin{itemize}
+      \item Mismo tamaño que los pesos
+      \item Necesarios para actualizar parámetros
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \item \textbf{Estados del optimizador} (Optimizer States)
+    \begin{itemize}
+      \item Para Adam: \alert{2× el tamaño de los pesos} (momentum + variance)
+      \item Para SGD: solo momentum (1× tamaño)
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \item \textbf{Activaciones} (Activations)
+    \begin{itemize}
+      \item Salidas intermedias de cada capa
+      \item Necesarias para calcular gradientes en backward pass
+      \item Crecen con batch size y sequence length
+    \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Comparación: Inferencia vs Training}
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|}
+  \hline
+  \textbf{Componente} & \textbf{Inferencia} & \textbf{Training} \\ \hline
+  Model Weights & $\checkmark$ & $\checkmark$ \\ \hline
+  Gradients & $\times$ & \alert{✓ (mismo tamaño que weights)} \\ \hline
+  Optimizer States & $\times$ & \alert{✓ (2× tamaño para Adam)} \\ \hline
+  Activations & Mínimas & \alert{✓ (todas las capas)} \\ \hline
+  KV Cache & ✓ (crece con contexto) & ✗ (no genera texto) \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Resultado}
+    Training requiere aproximadamente \alert{3-4× más memoria} que inferencia para el mismo modelo
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Ejemplo: Llama 3.1 70B}
+    \begin{itemize}
+      \item \textbf{Inferencia} FP16: ~168 GB
+      \item \textbf{Training} FP32 con Adam: \alert{~800+ GB}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Forward vs Backward Pass}
+
+  \begin{columns}[T]
+    \begin{column}{.48\textwidth}
+      \textbf{Forward Pass}
+      \begin{itemize}
+        \item Input → Output
+        \item Calcula predicciones
+        \item Almacena activaciones
+        \item Relativamente rápido
+      \end{itemize}
+
+      \vspace{0.3cm}
+
+      \textbf{En Inferencia:}
+      \begin{itemize}
+        \item Solo hacemos esto
+        \item Generamos token por token
+        \item No necesitamos gradientes
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{.48\textwidth}
+      \textbf{Backward Pass}
+      \begin{itemize}
+        \item Output → Input
+        \item Calcula gradientes
+        \item Usa activaciones guardadas
+        \item \alert{Más costoso en memoria}
+      \end{itemize}
+
+      \vspace{0.3cm}
+
+      \textbf{En Training:}
+      \begin{itemize}
+        \item Forward + Backward
+        \item Luego Optimization
+        \item \alert{Todo debe caber en memoria}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.5cm}
+
+  \begin{block}{KV Cache vs Activations}
+    \begin{itemize}
+      \item \textbf{KV Cache}: Solo en inferencia, crece con tokens generados
+      \item \textbf{Activations}: Solo en training, necesarias para backpropagation
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Resumen: Training ≠ Inference}
+
+  \begin{alertblock}{Memoria}
+    \textbf{Training} necesita 3-4× más memoria que \textbf{Inference}
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \begin{alertblock}{Objetivo}
+    \begin{itemize}
+      \item \textbf{Inference}: Baja latencia, servir múltiples usuarios
+      \item \textbf{Training}: Alto throughput, procesar muchos datos
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \begin{alertblock}{Hardware}
+    \begin{itemize}
+      \item \textbf{Inference}: Puede usar GPUs más pequeñas, quantization
+      \item \textbf{Training}: Necesita GPUs grandes, técnicas de optimización
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Ahora sí...}
+    Con esta distinción clara, \alert{hablemos de hardware}
+  \end{block}
+\end{frame}

@@ -1,0 +1,181 @@
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN MOTIVACIONAL
+% Basado en mi_plan.md - Ejemplos concretos de costos de entrenamiento
+%============================================================================
+
+\section{¿Qué tan caro es entrenar un LLM?}
+
+\begin{frame}
+  \frametitle{Entrenamiento de LLMs: Un proceso complejo}
+
+  Entrenar un modelo de lenguaje es un proceso largo y complejo que depende de muchísimos factores:
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item Tamaño del modelo (parámetros)
+    \item Arquitectura (dense vs MoE)
+    \item Cantidad de datos (tokens de entrenamiento)
+    \item Recursos computacionales disponibles
+    \item Software y optimizaciones utilizadas
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  También dependerá del \textbf{enfoque} que tengamos y de los \textbf{trade-offs} que estemos dispuestos a asumir.
+
+  \vspace{0.3cm}
+
+  Sabemos que entrenar es caro en términos de recursos, costo económico y tiempo...
+
+  \begin{alertblock}{¿Pero qué tan caro es realmente?}
+    Veamos algunos ejemplos concretos
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Como Referencia: Los Modelos Grandes}
+
+  % TODO: Agregar imagen con logos de las compañías en 3 columnas
+  % Placeholder para imagen que proporcionará el usuario
+  \begin{flushleft}
+
+  \begin{table}[h!]
+  \small
+  \begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \textbf{Modelo} & \textbf{Parámetros} & \textbf{GPU Hours} & \textbf{Costo (est.)} & \textbf{Datos} \\ \hline
+  GPT-3 & 175B & 355 GPU-years & \alert{\$1.1M - \$4.6M} & ~300B tokens \\
+  (OpenAI, 2020) & & (V100) & & \\ \hline
+  Llama 3.3 70B & 70B & 7.0M GPU-hours & \alert{(no público)} & 15T tokens \\
+  (Meta, 2024) & & (H100) & & \\ \hline
+  OLMo 3 32B & 32B & 1.05M GPU-hours & \alert{\~{}\$2.75M} & 6T tokens \\
+  (AI2, 2025) & & (H100) & & \\ \hline
+  \end{tabular}
+\end{table}
+\end{flushleft}  
+
+  \vspace{0.3cm}
+
+  \begin{block}{Referencia}
+    \small
+    Datos de \cite{gpt3_cost_lambda,gpt3_cost_epoch,llama33_training,olmo3_cost}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{No es la Verdad Absoluta: Eficiencia}
+
+  Algunos modelos desafían la narrativa del "más grande = más caro":
+
+  \vspace{0.3cm}
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \textbf{Modelo} & \textbf{Params} & \textbf{GPU Hours} & \textbf{Costo (est.)} & \textbf{Datos} \\ \hline
+  DeepSeek-V3 & 671B total & 2.788M GPU-hours & \alert{\~{}\$5.5M} & 14.8T tokens \\
+  (DeepSeek, 2024) & (37B activos) & (H800) & & \\ \hline
+  Mixtral 8x7B & 45B total & \alert{(no público)} & \alert{(no público)} & (no público) \\
+  (Mistral, 2023) & (12.9B activos) & & & \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{¿Por qué son más eficientes?}
+    \begin{itemize}
+      \item \textbf{Arquitectura MoE (Mixture of Experts)}: Solo activan una fracción de parámetros por token
+      \item \textbf{Ejemplo}: DeepSeek-V3 tiene 671B parámetros pero solo usa 37B por token
+      \item \textbf{Comparación}: Llama 3.1 405B usó 30.84M GPU-hours vs DeepSeek-V3 2.788M (\alert{11× menos!})
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  \begin{block}{Referencia}
+    \small
+    Datos de \cite{deepseek_v3_technical,deepseek_v3_cost,mixtral_blog}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Esto nos Ayuda a Tener una Noción}
+
+  \begin{itemize}
+    \item \textbf{Modelos grandes (70B+)} pueden costar \alert{millones de dólares} en entrenamiento
+    \item \textbf{GPU-hours} se miden en \alert{millones} para modelos frontier
+    \item \textbf{Datos} requeridos: \alert{trillones de tokens} (6T - 15T típicamente)
+    \item \textbf{Arquitectura importa}: MoE puede ser 10× más eficiente que dense
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Pero estos modelos son demasiado grandes...}
+    Veamos modelos más pequeños y accesibles
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Modelos Más Pequeños: También Potentes}
+
+  % TODO: Agregar logo/imagen de Qwen y Falcon
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|c|}
+  \hline
+  \textbf{Modelo} & \textbf{Parámetros} & \textbf{Datos} & \textbf{Notas} \\ \hline
+  Qwen 2.5 1.5B & 1.5B & 18T tokens & Pre-entrenado en dataset \\
+  (Alibaba, 2024) & & (serie completa) & masivo \cite{qwen25_github} \\ \hline
+  Falcon3 7B & 7B & 14T tokens & 1,024 H100 GPUs \\
+  (TII, 2024) & & & \cite{falcon3_huggingface} \\ \hline
+  \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Modelos mas pequeños}
+    
+  \begin{block}{¿Por qué son relevantes?}
+    \begin{itemize}
+      \item \textbf{Más accesibles}: Menor costo de entrenamiento y fine-tuning
+      \item \textbf{Más rápidos}: Inferencia más veloz
+      \item \textbf{Siguen siendo potentes}: Entrenados en datasets masivos (14-18T tokens)
+      \item \textbf{Ideales para fine-tuning}: Con técnicas modernas (que veremos hoy)
+    \end{itemize}
+  \end{block}
+  \begin{alertblock}{Mensaje clave}
+    No necesitas \alert{billones de parámetros} para tener un modelo útil
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Objetivo de la Clase}
+
+  \textbf{La idea de hoy es:}
+
+  \vspace{0.3cm}
+
+  \begin{enumerate}
+    \item Dar nociones de algunos \textbf{factores} que influirán en el entrenamiento de un modelo
+    \item Ver algunas \textbf{técnicas} que podemos utilizar para que no sea imposibilitante
+    \item Entender cómo \textbf{deployar} modelos de manera eficiente
+  \end{enumerate}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Vamos por partes...}
+    Ya tenemos noción de que el tamaño del modelo, los datos y muchas cosas influirán en los recursos que necesitamos para entrenar.
+
+    \vspace{0.2cm}
+
+    \alert{¡Así que vamos a hablar de hardware!}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{Pero antes...}
+\end{frame}

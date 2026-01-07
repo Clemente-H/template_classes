@@ -1,0 +1,89 @@
+% ============================================================================
+% SECCIÓN 8: DEPLOYMENT Y RECURSOS ÚTILES
+% vLLM, HuggingFace, herramientas prácticas
+%============================================================================
+
+\section{Deployment y Recursos Útiles}
+
+\begin{frame}
+  \frametitle{Poner tu Modelo en Producción}
+
+  Ya fine-tuneaste y evaluaste tu modelo. Ahora necesitas \textbf{servirlo a usuarios}:
+
+  \vspace{0.3cm}
+
+  \begin{block}{Desafíos del deployment}
+    \begin{itemize}
+      \item Manejar múltiples usuarios concurrentes
+      \item Baja latencia (Time To First Token)
+      \item Alto throughput (tokens/segundo)
+      \item Gestión eficiente de memoria (KV cache)
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  Se necesitan \textbf{sistemas especializados de serving}, no solo cargar el modelo con Python
+\end{frame}
+
+\begin{frame}
+  \frametitle{vLLM: El Estándar de Facto}
+
+  \textbf{vLLM:} Líder actual en throughput y eficiencia de memoria
+
+  \vspace{0.3cm}
+
+  \textbf{Innovación clave: PagedAttention}
+  \begin{itemize}
+    \item Maneja KV cache como memoria virtual del OS
+    \item Reduce fragmentación dramáticamente
+    \item Permite servir 2-4× más requests concurrentes
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Ventajas:}
+  \begin{itemize}
+    \item Hasta 24× mejor throughput que HuggingFace Transformers
+    \item Continuous batching inteligente
+    \item Soporte para 100+ arquitecturas
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Caso de uso:} APIs de producción con alto tráfico concurrente
+
+  \vspace{0.3cm}
+
+  \small
+  \url{https://github.com/vllm-project/vllm}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Otras Bibliotecas de Serving}
+
+  \textbf{Text Generation Inference (TGI - Hugging Face):}
+  \begin{itemize}
+    \item Integración perfecta con ecosistema HF
+    \item Telemetría robusta, Docker images pre-built
+    \item Caso de uso: Si ya usas HuggingFace
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{TensorRT-LLM (NVIDIA):}
+  \begin{itemize}
+    \item Máximo rendimiento en hardware NVIDIA
+    \item Optimizaciones a nivel CUDA
+    \item Caso de uso: Ultra-baja latencia requerida
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Ollama:}
+  \begin{itemize}
+    \item Setup en una línea, muy simple
+    \item Ideal para desarrollo local
+    \item Caso de uso: Prototipos, demos, desarrollo
+  \end{itemize}
+\end{frame}

@@ -1,0 +1,124 @@
+% ============================================================================
+% SECCIÓN 4: SOFTWARE Y LIBRERÍAS
+% Mención rápida de frameworks de entrenamiento
+%============================================================================
+
+\section{Software: Frameworks de Entrenamiento}
+
+\begin{frame}
+  \frametitle{La Complejidad de la Comunicación}
+
+  Como vimos, la comunicación inter-GPU e intra-GPU es compleja y costosa.
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{El problema}
+    Implementar paralelismo eficiente desde cero es \alert{extremadamente difícil}:
+    \begin{itemize}
+      \item Sincronización de gradientes
+      \item Distribución de datos
+      \item Gestión de memoria distribuida
+      \item Manejo de fallos
+    \end{itemize}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{La solución}
+    Usar \textbf{bibliotecas y frameworks especializados} que ya resuelven estos problemas
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frameworks Populares de Entrenamiento}
+
+  \begin{table}[h!]
+  \centering
+  \small
+  \begin{tabular}{|l|p{6cm}|}
+  \hline
+  \textbf{Framework} & \textbf{Características} \\ \hline
+  \textbf{PyTorch} &
+  Base para mayoría de LLMs, FSDP para paralelismo, flexible pero manual \\ \hline
+  \textbf{HuggingFace Accelerate} &
+  Abstracción sobre PyTorch, fácil de usar, multi-GPU automático \\ \hline
+  \textbf{DeepSpeed (Microsoft)} &
+  ZeRO optimization, eficiente en memoria, usado por muchos labs \\ \hline
+  \textbf{NeMo (NVIDIA)} &
+  Optimizado para GPUs NVIDIA, incluye NeMo-Aligner para RLHF \\ \hline
+  \textbf{AWS SageMaker} &
+  Managed training, integración con AWS, costoso pero conveniente \\ \hline
+  \end{tabular}
+  \end{table}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Trade-offs}
+    Cada framework tiene trade-offs que mejoran o empeoran dependiendo de la situación y algunos son optimizados para arquitecturas específicas de hardware
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ejemplo: NeMo vs PyTorch Vanilla}
+
+  \begin{columns}[T]
+    \begin{column}{.48\textwidth}
+      \textbf{PyTorch + FSDP}
+      \begin{itemize}
+        \item[\alert{+}] Máximo control
+        \item[\alert{+}] Flexibilidad total
+        \item[\alert{-}] Mucho código manual
+        \item[\alert{-}] Fácil cometer errores
+        \item[\alert{-}] Debugging complejo
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{.48\textwidth}
+      \textbf{NVIDIA NeMo}
+      \begin{itemize}
+        \item[\alert{+}] Optimizado para NVIDIA GPUs
+        \item[\alert{+}] Menos código (configuración YAML)
+        \item[\alert{+}] Incluye best practices
+        \item[\alert{-}] Menos flexible
+        \item[\alert{-}] Vendor lock-in
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.5cm}
+
+  \begin{block}{¿Cuál elegir?}
+    \begin{itemize}
+      \item \textbf{Research/experimentación:} PyTorch + Accelerate
+      \item \textbf{Producción con NVIDIA:} NeMo
+      \item \textbf{Máxima eficiencia de memoria:} DeepSpeed ZeRO
+      \item \textbf{Cloud managed:} SageMaker
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{No Profundizaremos Más en Software de Training}
+
+  \textbf{Solo mencionar} que estas bibliotecas existen y son esenciales:
+
+  \vspace{0.3cm}
+
+  \begin{itemize}
+    \item Manejan la complejidad de paralelismo distribuido
+    \item Optimizan comunicación inter-GPU
+    \item Implementan técnicas avanzadas (ZeRO, FSDP, gradient checkpointing)
+    \item Permiten entrenar modelos que de otra forma serían imposibles
+  \end{itemize}
+
+  \vspace{0.5cm}
+
+  \begin{block}{Enfoque de la clase}
+    En lugar de profundizar en implementación de paralelismo, nos enfocaremos en:
+    \begin{enumerate}
+      \item \alert{El ciclo completo de entrenamiento} (base → instruction → preference)
+      \item \alert{Técnicas de optimización} que reducen recursos necesarios
+      \item \alert{Deployment} eficiente en producción
+    \end{enumerate}
+  \end{block}
+\end{frame}
