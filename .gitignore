@@ -26,5 +26,7 @@
 *.blg
 *.bbl
 
-clases/Diplomado_cenia/drafts/*
-clases/Diplomado_cenia/images/*
+clases/Diplomado_cenia/clase1/drafts/*
+clases/Diplomado_cenia/clase1/images/*
+clases/Diplomado_cenia/clase2/drafts_and_context/*
+clases/Diplomado_cenia/clase2/images/*
