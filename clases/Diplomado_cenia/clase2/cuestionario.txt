@@ -1,0 +1,48 @@
+### 1 - ¿Cuál es la diferencia entre un modelo llm base y un modelo instruct?
+ a) El modelo base solo sigue instrucciones
+ b) El modelo instruct sigue instrucciones
+ c) El modelo base no es un modelo de lenguage
+ d) El modelo base es mucho mas barato
+
+Correcto: b
+
+### 2 - ¿Qué factores influyen en el tiempo del entrenamiento de un LLM?
+ a) El volumen de datos de entrenamiento
+ b) El tamaño de parametros del llm
+ c) El hardware
+ d) Todas las anteriores
+
+Correcto: d
+
+### 3 - ¿Qué hace LorA?
+ a) Permite entrenar con menos recursos (hardware)
+ b) Hace que entrenar sea mas caro
+ c) Se usa para hacer pipelines de datos
+ d) Ninguna de las anteriores
+
+Correcto: a
+
+### 4 - ¿En qué se diferencia el Entrenamiento y la Inferencia?
+ a) La inferencia siempre es mas costosa que el entrenamiento
+ b) El entrenamiento es mas costoso que la inferencia
+ c) La inferencia no depende de GPU's
+ d) El entrenamiento no depende de GPU's
+
+Correcto: b
+
+### 5 - Señale un método para hacer que un modelo use menos recursos en entrenamiento
+ a) Q-Lora
+ b) Lora
+ c) Quantization
+ d) todas son correctas
+
+Correcto: d
+
+### 6 - ¿Por qué Entrenamiento es más costoso que inferencia?
+
+ a) Porque computa gradientes
+ b) Por el backpass
+ c) Porque entrenamiento almacena optimizadores
+ d) Todas son correctas
+
+Correcto: d
