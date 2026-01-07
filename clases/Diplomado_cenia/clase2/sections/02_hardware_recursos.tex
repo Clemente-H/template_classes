@@ -1,0 +1,319 @@
+% ============================================================================
+% SECCIÓN: HARDWARE Y RECURSOS COMPUTACIONALES
+%============================================================================
+
+\section{Hardware y Recursos Computacionales}
+
+\subsection{Fundamentos de GPUs}
+
+\begin{frame}{¿Por qué GPUs y no CPUs?}
+
+    \begin{columns}[T]
+        \begin{column}{.48\textwidth}
+            \textbf{CPUs}
+            \begin{itemize}
+                \item Optimizadas para latencia
+                \item Pocas cores muy rápidos
+                \item Excelentes para tareas secuenciales
+                \item No eficientes para LLMs
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{.48\textwidth}
+            \textbf{GPUs}
+            \begin{itemize}
+                \item Optimizadas para throughput
+                \item Miles de cores paralelos
+                \item Excelentes para operaciones matriciales
+                \item \alert{Ideales para LLMs}
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5cm}
+
+    \begin{block}{El cuello de botella: VRAM}
+        La memoria de la GPU (VRAM) es el recurso más crítico. Determina qué tan grande puede ser tu modelo y batch size.
+    \end{block}
+\end{frame}
+
+\begin{frame}{Tipos de GPUs Comunes}
+
+    \textbf{Consumer GPUs:}
+    \begin{itemize}
+        \item RTX 3060/4060: 12-16 GB VRAM (~\$300-400)
+        \item RTX 4090: 24 GB VRAM (~\$1,600)
+        \item Accesibles pero limitadas en memoria
+    \end{itemize}
+
+    \vspace{0.3cm}
+
+    \textbf{Datacenter GPUs:}
+    \begin{itemize}
+        \item A100: 40 GB o 80 GB VRAM (~\$2-4/hora en cloud)
+        \item H100: 80 GB VRAM (~\$4-8/hora en cloud)
+        \item Optimizadas para ML, muy costosas
+    \end{itemize}
+
+    \vspace{0.3cm}
+
+    \begin{alertblock}{Trade-off fundamental}
+        Consumer GPUs son accesibles pero limitadas. Datacenter GPUs son potentes pero caras. Las técnicas de optimización nos permiten trabajar con consumer GPUs.
+    \end{alertblock}
+\end{frame}
+
+\subsection{Calculando Recursos Necesarios}
+
+\begin{frame}[fragile]{Estimación de Recursos para Inferencia}
+
+    La ecuación fundamental para estimar memoria GPU requerida en inferencia:
+
+    \begin{block}{Fórmula básica}
+    \[
+    \text{Memoria (GB)} = \frac{\text{Parámetros} \times \text{Bytes}_{\text{precisión}}}{10^9} \times 1.2
+    \]
+    El factor 1.2 representa overhead (~20\%) para activations, KV cache, y buffers temporales.
+    \end{block}
+
+    \vspace*{-.3cm}
+    \begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{|l|c|c|c|}
+    \hline
+    \textbf{Precisión} & \textbf{Bits} & \textbf{Bytes/param} & \textbf{Uso típico} \\ \hline
+    FP32 & 32 & 4 & Raramente en inferencia \\ \hline
+    FP16 & 16 & 2 & \alert{Estándar actual} \\ \hline
+    INT8 & 8 & 1 & Quantized, pérdida mínima \\ \hline
+    INT4 & 4 & 0.5 & Muy quantized, requiere cuidado \\ \hline
+    \end{tabular}
+    \end{table}
+
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplos Concretos: Llama 3.1}
+
+    \textbf{Llama 3.1 8B} en FP16:
+    \begin{itemize}
+        \item Parámetros: 8B
+        \item Memoria = \(\frac{8B \times 2}{10^9} \times 1.2\) = \alert{19.2 GB}
+        \item \textbf{Hardware necesario}: RTX 4090 (24GB), A10 (24GB)
+    \end{itemize}
+
+    \vspace*{.2cm}
+    \textbf{Llama 3.1 70B} en FP16:
+    \begin{itemize}
+        \item Parámetros: 70B
+        \item Memoria = \(\frac{70B \times 2}{10^9} \times 1.2\) = \alert{168 GB}
+        \item \textbf{Hardware necesario}: 2$\times$ A100 80GB o 3$\times$ A10 80GB
+    \end{itemize}
+
+    \vspace*{.2cm}
+    \textbf{Llama 3.1 8B} en INT4 (quantized):
+    \begin{itemize}
+        \item Memoria = \(\frac{8B \times 0.5}{10^9} \times 1.2\) = \alert{4.8 GB}
+        \item \textbf{Hardware necesario}: GPU consumer (RTX 3060, 4060)
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Calculadora VRAM Interactiva}
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{GenIA/Vram_estimator.png}
+    \caption{VRAM Calculator: \url{https://vram.asmirnov.xyz}}
+\end{figure}
+
+\vspace{0.3cm}
+
+\textbf{Parámetros que puedes ajustar:}
+\begin{itemize}
+    \item Modelo (número de parámetros)
+    \item Precisión (FP32, FP16, INT8, INT4)
+    \item Batch size
+    \item Sequence length
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Componentes del Uso de Memoria en Inferencia}
+
+    \begin{enumerate}
+        \item \textbf{Model Weights (60-80\% del total)}: Los parámetros del modelo
+        \item \textbf{KV Cache (15-30\%)}: Almacena key-value tensors de atención, crece con contexto y batch size
+        \item \textbf{Activations y buffers (5-10\%)}: Resultados intermedios durante forward pass
+        \item \textbf{Overhead de fragmentación (5-10\%)}: Espacio desperdiciado en asignación de memoria
+    \end{enumerate}
+
+    \vspace{0.3cm}
+
+    \begin{alertblock}{Implicación}
+        El KV cache puede dominar el uso de memoria cuando sirves múltiples usuarios concurrentemente o con contextos largos.
+    \end{alertblock}
+\end{frame}
+
+\subsection{Training vs Inference}
+
+\begin{frame}{Componentes de Memoria en Training}
+
+    Cuando se entrena un LLM, se almacenan varios elementos en memoria:
+
+    \begin{itemize}
+        \item \textbf{Pesos del modelo}
+        \item \textbf{Gradientes del modelo} (mismo tamaño que pesos)
+        \item \textbf{Estados del optimizador} (para Adam: 2× el tamaño de los pesos)
+        \item \textbf{Activaciones} necesarias para calcular los gradientes
+    \end{itemize}
+
+    \vspace{0.3cm}
+
+    Estos elementos se almacenan en forma de tensores de diferentes dimensiones y precisiones.
+
+    \vspace{0.3cm}
+
+    \begin{block}{Dimensiones y Precisión}
+        Las dimensiones están determinadas por hiperparámetros como batch size, longitud de secuencia, hidden dimensions, attention heads y tamaño del vocabulario.
+    \end{block}
+\end{frame}
+
+\begin{frame}{Precisión y Bytes por Parámetro}
+
+    La precisión se refiere a formatos como FP32, BF16 o FP8, que requieren respectivamente 4, 2 o 1 byte para almacenar cada valor del tensor.
+
+    \vspace{0.3cm}
+
+    \begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|c|c|}
+    \hline
+    \textbf{Formato} & \textbf{Bits} & \textbf{Bytes/valor} \\ \hline
+    FP32 & 32 & 4 \\ \hline
+    BF16 / FP16 & 16 & 2 \\ \hline
+    FP8 & 8 & 1 \\ \hline
+    \end{tabular}
+    \end{table}
+
+    \vspace{0.3cm}
+
+    \begin{alertblock}{Implicación}
+        Usar FP16 en lugar de FP32 reduce el uso de memoria a la mitad, con pérdida de precisión mínima.
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Batch Size y su Impacto}
+
+    El batch size es un hiperparámetro crucial para el entrenamiento:
+
+    \vspace{0.3cm}
+
+    \begin{itemize}
+        \item \textbf{Tamaño típico actual:} 4-60M de tokens/batch
+        \item \textbf{Ejemplo - Llama-1:} Entrenó con batch de \alert{4M tokens} para 1.4 trillones de tokens totales
+        \item \textbf{Ejemplo - DeepSeek:} Entrenó con batch de \alert{60M tokens} para 14 trillones de tokens totales
+    \end{itemize}
+
+    \vspace{0.5cm}
+
+    \begin{alertblock}{El problema común}
+        "No tengo memoria suficiente para este tamaño de batch"
+    \end{alertblock}
+
+    \vspace{0.3cm}
+
+    Solución: Usar técnicas de optimización como gradient accumulation, mixed precision, o gradient checkpointing.
+\end{frame}
+
+\begin{frame}[fragile]{Training vs Inference: Diferencias Críticas}
+
+    \textbf{Memoria en Training} (3-4$\times$ más que inferencia):
+
+    \begin{itemize}
+        \item \textbf{Parámetros}: Mismos que inferencia
+        \item \textbf{Gradientes}: Mismo tamaño que parámetros
+        \item \textbf{Activations de todas las capas}: Para backpropagation
+        \item \textbf{Optimizer states}: Para Adam = 2$\times$ parámetros adicionales
+        \begin{itemize}
+            \item Momentum: 1$\times$ parámetros
+            \item Variance: 1$\times$ parámetros
+        \end{itemize}
+    \end{itemize}
+
+    \vspace*{.2cm}
+    \textbf{Ejemplo Llama 3.1 70B}:
+    \begin{itemize}
+        \item Inferencia FP16: $\sim$168 GB
+        \item Training FP32 con Adam: \alert{$\sim$800+ GB}
+        \item Requiere técnicas avanzadas: FSDP, DeepSpeed, ZeRO
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Visualización: Memory Profiler Durante Training}
+
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{GenIA/memory_profiler_training.png}
+    \caption{Memory profile de los primeros 4 pasos de entrenamiento de Llama 1B usando PyTorch profiler}
+\end{figure}
+
+\vspace{0.2cm}
+
+\small
+Picos de memoria en:
+\begin{itemize}
+    \item \textbf{FWD} (forward pass)
+    \item \textbf{BWD} (backward pass)
+    \item \textbf{OPT} (optimizer step)
+\end{itemize}
+
+Útil para debugging de OOM (Out Of Memory) errors.
+\end{frame}
+
+\begin{frame}{Escalamiento de Memoria con Batch Size}
+
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{GenIA/memory_scaling_batch.png}
+    \caption{Uso de memoria en Meta-Llama 3.1 (8B, 70B, 405B) con diferentes batch sizes}
+\end{figure}
+
+\vspace{0.2cm}
+
+\begin{alertblock}{Observación clave}
+    El uso de memoria NO es estático para un modelo dado, sino que \alert{aumenta linealmente con el tamaño del batch} y \alert{cuadráticamente con la longitud de la secuencia}.
+\end{alertblock}
+\end{frame}
+
+\subsection{Referencias de Entrenamiento Real}
+
+\begin{frame}{¿Cuánto Cuesta Realmente Entrenar un LLM?}
+
+    \textbf{Casos históricos documentados:}
+
+    \vspace{0.3cm}
+
+    \begin{itemize}
+        \item \textbf{GPT-3 (175B parámetros):}
+        \begin{itemize}
+            \item ~355 GPU-years en NVIDIA V100
+            \item Costo estimado: ~\$4.6 millones
+            \item Si tienes 8× A100: tomaría ~4.5 años
+        \end{itemize}
+
+        \vspace{0.3cm}
+
+        \item \textbf{Llama 2 (70B parámetros):}
+        \begin{itemize}
+            \item ~1.7 millones de GPU-hours en A100
+            \item Si tienes 1× RTX 4090: prácticamente imposible desde cero
+        \end{itemize}
+    \end{itemize}
+
+    \vspace{0.3cm}
+
+    \begin{block}{Mensaje clave}
+        \begin{itemize}
+            \item Pre-training desde cero = solo para grandes labs (OpenAI, Meta, Google)
+            \item \alert{Fine-tuning = accesible con técnicas modernas} (que veremos a continuación)
+        \end{itemize}
+    \end{block}
+\end{frame}
